@@ -1,0 +1,292 @@
+
+/* Modal Styles */
+.report-details-modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+    z-index: 1000;
+    padding: 20px; /* Ensures space around modal */
+    align-items: center; /* Center modal content vertically */
+    justify-content: center; /* Center modal content horizontally */
+    animation: fadeIn 0.5s ease; /* Animation effect */
+}
+
+
+/* Modal Content Styles */
+.modal-content {
+    background-color: #ffffff; /* White background for content */
+    color: #333333; /* Dark text for good contrast and readability */
+    padding: 30px; /* More padding for a formal look */
+    border-radius: 8px;
+    width: 30%; /* Adjust width for better visual balance */
+    max-height: 80%; /* Limit height */
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    box-sizing: border-box;
+    position: relative; /* Position for the close button */
+    border: 2px solid #003D73; /* Dark teal border for a formal, professional feel */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    font-family: 'Arial', sans-serif; /* Clean, professional font */
+    animation: slideIn 0.5s ease; /* Animation effect */
+}
+
+/* Close Button Style */
+.close-btn {
+    font-size: 28px;
+    color: #00796b; /* Teal color for consistency with the theme */
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    transition: color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.close-btn:hover {
+    color: #d32f2f; /* Red color on hover for a clear indication */
+}
+
+/* Modal Title (h3) Style */
+.modal-content h3 {
+    margin-top: 0;
+    font-size: 20px;
+    color: #003D73;
+    font-weight: 600; /* Make the title bold */
+    margin-bottom: 10px; /* Space below the title */
+    text-align: center; /* Left-align the header */
+}
+
+/* Paragraph Style */
+.modal-content p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #555; /* Slightly lighter text for body content */
+    text-align: left; /* Left-align the paragraph text */
+    margin-bottom: 15px; /* Add space between paragraphs */
+}
+
+/* For Details Section */
+.modal-content .details-section {
+    margin-top: 20px;
+    margin-bottom: 5px;
+}
+
+/* Buttons Inside Modal (e.g., if you have buttons for actions) */
+.modal-content .action-button {
+    background-color: #003D73;
+    color: white;   
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease; /* Smooth background change */
+}
+
+.modal-content .action-button:hover {
+    background-color: #011e38;
+}
+
+/* Scrollable Modal Content */
+.report-details-modal .modal-content {
+    max-height: 100vh; /* 80% of the viewport height */
+    overflow-y: auto; /* Scroll if content exceeds this height */
+}
+
+
+/* Adding Hover Effect to Modal Content */
+.modal-content:hover {
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.15); /* Subtle hover effect for depth */
+}
+
+        .filter{
+            margin: 0px ;
+            padding: 5px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .filter label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .filter select{
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
+
+        .filter select:focus{
+            border-color: #007bff;
+        }
+
+
+
+        .dropdown-btn i.fa-chevron-down {
+            margin-left: 50px; /* Push the chevron to the right */
+            transition: transform 0.3s ease;
+        }
+
+        .dropdown-btn.active i.fa-chevron-down {
+            transform: rotate(180deg); /* Rotate the chevron when active */
+        }
+
+        .fa-chevron-down{
+            font-size: 10px;
+        }    
+
+
+
+    /* Dropdown and profile styles */
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+    }
+
+    .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+    }
+
+    .dropdown-content a:hover {
+        background-color: #ddd;
+    }
+
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+.edit-btn{
+color: white;
+background-color:#003D73;
+border-style: hidden;
+margin: 0;                 /* Add space between buttons */
+padding: 10px 12px;              /* Adjust padding as needed */
+font-size: 14px;                /* Font size */
+border-radius: 0px;             /* Rounded corners */
+cursor: pointer;  
+}
+
+.edit-btn:hover{
+    background-color: #011e38;
+}
+
+.delete-btn{
+color: white;
+background-color:#bd000a;
+border-style: hidden;
+margin: 0;                 /* Add space between buttons */
+padding: 10px 12px;              /* Adjust padding as needed */
+font-size: 14px;                /* Font size */
+border-radius: 0px;             /* Rounded corners */
+cursor: pointer;  
+}
+
+.delete-btn:hover{
+    background-color: #810000;
+}
+
+
+h4{
+text-align: left;
+padding-bottom: 10px;
+}
+
+.success-modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    animation: fadeIn 0.5s ease; /* Animation effect */
+}
+
+.success-modal .success-modal-content {
+    background-color: #e1e1e1;
+    margin: 10% auto;
+    padding: 10px;
+    border: 1px solid #888;
+    border-radius: 10px;
+    width: 200px;
+    text-align: center;
+    animation: slideIn 0.5s ease; /* Animation effect */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+    .success-modal h2 {
+        font-size: 20px;
+        margin: 10px;
+        color:  #003D73;
+    }
+/* Icon Animation */
+@keyframes iconBounce {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+    }
+}
+
+.success-modal i {
+    margin: 5px;
+        font-size: 40px;
+        color: #003D73;
+    animation: iconBounce 1s infinite;
+}
+
+
+.success-modal p {
+        text-align: center;
+        font-size: 16px;
+        color: black;
+    }
+
+    .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }

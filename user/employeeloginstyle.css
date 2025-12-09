@@ -1,0 +1,268 @@
+/* employeeloginstyle.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color:#003D73;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: row;
+    width: 80%;
+    max-width: 1200px;
+    background: white;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.info-container {
+    flex: 1;
+    padding: 20px;
+    background: transparent;
+    color: #ffffff;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.info-container h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #003d73;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.info-container .images-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Adjust spacing between images */
+    margin-top: 20px;
+}
+
+.info-container img {
+    width: 150px;
+    height: auto;
+}
+
+.form-container {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+}
+
+.form_header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.icon-circle {
+    width: 80px;
+    height: 80px;
+    background: #003D73;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 10px;
+}
+
+.user-icon {
+    font-size: 40px;
+    color: #ffffff;
+}
+
+h2 {
+    color: #333333;
+    margin: 0;
+}
+
+.input-container {
+    margin-bottom: 20px;
+}
+
+.input-container label {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    display: block;
+    color: #003D73;
+    font-weight: bold;
+}
+
+.input-container input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.eye-icon {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #999999;
+}
+
+.eye-icon:hover{
+    color: black;
+}
+
+.form-actions button {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    background: #003D73;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #ffffff;
+    font-weight: bold;
+    transition: background 0.3s, color 0.3s;
+}
+
+.form-actions button:active {
+    transform: scale(0.98);
+}
+
+.form-actions button:hover {
+    background: #ffffff;
+    color: #003D73;
+    animation:alternate-reverse;
+    box-shadow: 0 6px 24px hsla(236, 100%, 61%, 0.16);
+}
+
+@keyframes buttonHover {
+    0% {
+        background-color: #ffffff;
+        color: #003d73;
+    }
+    100% {
+        background-color: #003d73;
+        color: #ffffff;
+    }
+}
+
+/* Flex container for aligning the forgot password and sign up links */
+.links-container {
+    display: flex;
+    justify-content: space-between; /* Spaces the elements to the edges */
+    align-items: center; /* Aligns vertically in the center */
+    margin-top: 20px;
+}
+
+/* Optional styling to make sure the text fits well */
+.links-container a {
+    color:#003D73; /* Link color */
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.links-container a:hover {
+    text-decoration: underline;
+   color: #011e38; /* Underline on hover for better interaction */
+}
+
+/* Ensure the sign-up text and link appear on one line */
+.sign-up-container p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.notification-modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    animation: fadeIn 0.5s ease; /* Animation effect */
+}
+
+.notification-modal .notification-content {
+    background-color: #bd000a;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px hidden #888;
+    border-radius: 10px;
+    width: 300px;
+    text-align: left;
+    animation: slideIn 0.5s ease; /* Animation effect */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+    .notification-modal h3 {
+        font-size: 18px;
+        margin: 10px;
+        color:  #e1e1e1;
+    }
+/* Icon Animatiosuccessn */
+@keyframes iconBounce {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+    }
+}
+
+.notification-modal i {
+    margin: 5px;
+        font-size: 40px;
+        color: #e1e1e1;
+    animation: iconBounce 1s infinite;
+}
+
+
+
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    color: #999999;
+    cursor: pointer;
+}
+
+.close-btn:hover{
+    color: black;
+}

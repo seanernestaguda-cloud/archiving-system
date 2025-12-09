@@ -1,0 +1,39 @@
+@startuml
+left to right direction
+actor Admin
+actor User
+
+rectangle "Archiving System" {
+  User -- (Login)
+  User -- (Logout)
+  Admin -- (Login)
+  Admin -- (Logout)
+
+  User -- (Submit Report)
+  User -- (Edit Own Report)
+  User -- (View Reports)
+  User -- (Download Report / Permit)
+  User -- (View Archive)
+  User -- (Generate PDF / Export)
+  User -- (Manage Profile)
+
+  Admin -- (Manage Users)
+  Admin -- (Manage Barangays)
+  Admin -- (Manage Permits)
+  Admin -- (Approve / Toggle Status)
+  Admin -- (View All Reports)
+  Admin -- (Delete / Permanently Delete)
+  Admin -- (Restore from Archive)
+  Admin -- (Empty Recycle Bin)
+  Admin -- (View Dashboards / Charts)
+  Admin -- (Export / Generate Reports)
+  Admin -- (Search / AJAX Lookups)
+  Admin -- (Manage Settings)
+  Admin -- (Manage Files / Uploads)
+  
+  (Manage Users) ..> (Manage Profile) : includes
+  (View All Reports) ..> (View Reports) : extends
+  (Generate PDF / Export) ..> (Download Report / Permit) : includes
+}
+
+@enduml

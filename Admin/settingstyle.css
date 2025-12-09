@@ -1,0 +1,140 @@
+/* General styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+.dashboard {
+    display: flex;
+}
+
+/* Form styles */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: bold;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.control-label{
+    margin-top: 10px;
+}
+
+.custom-file-input {
+    width: 300px;
+    margin-right: 10px;
+}
+
+.img-thumbnail {
+    max-width: 150px;
+    margin-top: 10px;
+}
+
+.d-flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+label {
+    font-size: 14px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* Search input styling */
+.entries-search {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px 0;
+}
+
+.custom-select {
+    margin-left: 10px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.search-input {
+    margin-left: 5px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+    }
+    .user-icon {
+        top: 0;
+        right: 10px;
+    }
+}
+
+.custom-file-input {
+    position: absolute;
+    z-index: 2;
+    width: auto;
+    height: 100%;
+    opacity: 0; /* Hide the default file input */
+    cursor: pointer;
+}
+
+.custom-file-label {
+    width: auto;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Remove the ::after pseudo-element */
+.custom-file-label::after {
+    content: ""; /* Remove any text content */
+}
+
+
+.custom-file-input:focus + .custom-file-label {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.custom-file-input:valid + .custom-file-label {
+    color: #495057; /* Change text color when a file is selected */
+}
+
+.custom-file-input:focus + .custom-file-label,
+.custom-file-input:checked + .custom-file-label,
+.custom-file-input:hover + .custom-file-label {
+    background-color: #e2e6ea; /* Change background color on focus or hover */
+}
+
+.custom-file-input:focus + .custom-file-label::after,
+.custom-file-input:valid + .custom-file-label::after {
+    content: ""; /* Optional: display when a file is selected */
+    font-weight: bold;
+    color: #28a745; /* Change text color to indicate selection */
+}

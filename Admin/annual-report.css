@@ -1,0 +1,85 @@
+/* Annual report style: mimic the blue-paper form
+   - Blue title bar, light background, boxed sections
+   - Single-line inputs, subtle borders, consistent spacing
+   - Two-column responsive layout for form groups
+*/
+:root{
+  --bfp-blue:#003D73;
+  --light-blue:#e6f0fb;
+  --muted:#6b7280;
+  --card-bg:#fffefc;
+}
+body{
+  background: linear-gradient(180deg,#f2f6fb 0%, #ffffff 100%);
+  font-family: Arial, Helvetica, sans-serif;
+  color: #111827;
+}
+.card{
+  max-width: 980px;
+  margin: 24px auto;
+  background: var(--card-bg);
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(2,6,23,0.08);
+  padding: 22px;
+  border: 1px solid #e6eef8;
+}
+.form-header{ 
+  background: var(--bfp-blue);
+  color: #fff;
+  padding: 16px 20px;
+  border-radius: 6px;
+  text-align: center;
+  margin-bottom: 18px;
+}
+.form-header h2{ margin:0; font-size:20px; letter-spacing:0.6px }
+fieldset{ 
+  border: none;
+  background: #fff;
+  margin: 0 0 18px 0;
+}
+legend{ 
+  display:block;
+  background: var(--light-blue);
+  color: var(--bfp-blue);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  width: fit-content;
+}
+.form-row{ display:flex; flex-wrap:wrap; gap:12px }
+.form-group{ margin-bottom:12px; }
+.form-group label{ display:block; font-weight:600; color:var(--bfp-blue); margin-bottom:6px }
+input[type=text], input[type=time], input[type=datetime-local], select, textarea{ 
+  display:block; 
+  width:100%;
+  padding:10px 12px;
+  border: none;
+  border-bottom: 1px solid #cbd5e1;
+  font-size:14px;
+  border-radius: 2px;
+  background: transparent;
+  box-sizing:border-box;
+}
+textarea{ resize:vertical; min-height:120px }
+label.small{ font-size:13px; color:var(--muted); font-weight:500 }
+.form-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:10px }
+.btn{ padding:10px 18px; border-radius:6px; border:none; cursor:pointer }
+.btn-primary{ background:var(--bfp-blue); color:white }
+.btn-cancel{ background:#bd000a; color:white }
+/* Two column layout helpers based on inline width used in file; override to consistent grid */
+.form-grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap:16px }
+@media (max-width:900px){ .form-grid{ grid-template-columns: 1fr } }
+/* File upload visuals */
+.custom-file-upload{ border:1px dashed #cbd5e1; padding:14px; border-radius:6px; background:#fbfeff }
+.drop-area{ text-align:center; padding:12px }
+.upload-icon{ font-size:22px; color:var(--bfp-blue); display:block }
+#file-list-photos{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px }
+#file-list-photos .photo-item{ background:#f8fafc; padding:6px 8px; border-radius:6px; border:1px solid #eef2f7 }
+.alert{ padding:10px; border-radius:6px; margin-bottom:12px }
+.alert-success{ background:#e6f6ed; color:#065f46 }
+.alert-danger{ background:#fdecea; color:#7f1d1d }
+/* small adjustments to match the sample spacing */
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus{
+  outline: none; border-bottom-color: var(--bfp-blue);
+}

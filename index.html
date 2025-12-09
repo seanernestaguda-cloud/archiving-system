@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Bureau of Fire Protection - Archiving System. Search, create and manage archive reports."
+    />
+    <link rel="icon" type="image/png" href="REPORT.png" />
+    <link rel="stylesheet" href="style.css" />
+    <!-- adjust these paths if your fontawesome files live elsewhere -->
+    <link rel="stylesheet" href="css/all.min.css" />
+    <link rel="stylesheet" href="css/fontawesome.min.css" />
+    <title>BFP Archiving System — Home</title>
+    <style>
+      /* Minimal hero styles here while you move the rest to style.css */
+      .image-container {
+        min-height: 380px;
+        background-image: url("film archive.jpg");
+        background-size: 100%;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        position: relative;
+      }
+      .image-container::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(
+          0,
+          0,
+          0,
+          0.35
+        ); /* subtle overlay to improve text contrast */
+      }
+      .hero {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 900px;
+        padding: 40px 20px;
+      }
+      .hero h1 {
+        font-size: 28px;
+        margin-bottom: 10px;
+      }
+      .hero p {
+        margin-bottom: 18px;
+      }
+      .hero-ctas .btn {
+        display: inline-block;
+        padding: 10px 18px;
+        border-radius: 6px;
+        text-decoration: none;
+        margin: 0 8px;
+      }
+      .btn.primary {
+        background: #d32f2f;
+        color: #fff;
+      }
+      .btn.outline {
+        background: transparent;
+        border: 2px solid #fff;
+        color: #fff;
+      }
+      footer {
+        position: static;
+        z-index: 1;
+        clear: both;
+      }
+      .features {
+        padding: 36px 20px;
+        text-align: center;
+      }
+      .features .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        max-width: 1000px;
+        margin: 18px auto;
+      }
+      .card {
+        padding: 18px;
+        border-radius: 8px;
+        background: #f7f7f7;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      }
+    </style>
+  </head>
+  <body>
+    <a
+      class="skip-link"
+      href="#main"
+      style="
+        position: absolute;
+        left: -999px;
+        top: auto;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+      "
+      >Skip to content</a
+    >
+
+    <header role="banner">
+      <nav class="navbar" role="navigation" aria-label="Primary">
+        <div class="logo">
+          <a href="index.html">BUREAU OF FIRE PROTECTION ARCHIVING SYSTEM</a>
+        </div>
+        <ul class="nav-links">
+          <li><a href="user/signup.php">Register</a></li>
+          <li><a href="user/userlogin.php">Employee Login</a></li>
+          <li><a href="Admin/adminlogin.php">Admin Login</a></li>
+        </ul>
+      </nav>
+
+      <nav class="navbar2" role="navigation" aria-label="Secondary">
+        <ul class="nav-links">
+          <li><a class="active" href="index.html">Home</a></li>
+          <li><a href="About.html">About Us</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main" role="main">
+      <section class="image-container" aria-label="Hero">
+        <div class="hero">
+          <h1>Welcome to the BFP Archiving System</h1>
+          <p>
+            Search, create and manage official reports securely and efficiently.
+          </p>
+          <div class="hero-ctas"></div>
+        </div>
+      </section>
+
+      <section class="features">
+        <h2>What you can do</h2>
+        <div class="cards">
+          <article class="card">
+            <h3 id="f1">Search Archives</h3>
+            <p>Quickly find documents by name, date or tags.</p>
+          </article>
+          <article class="card">
+            <h3 id="f2">Create Archives</h3>
+            <p>Create and manage reports.</p>
+          </article>
+          <article class="card">
+            <h3 id="f3">Reports</h3>
+            <p>Generate and export archive reports.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="welcome-box" aria-label="Welcome">
+        <h2>BUREAU OF FIRE PROTECTION ARCHIVING SYSTEM</h2>
+        <hr />
+        <p>
+          We are glad to have you here! Explore our services and learn more
+          about what we offer.
+        </p>
+      </section>
+    </main>
+
+    <footer role="contentinfo">
+      <div class="footer-content">
+        <p>&copy; Copyright 2025. All rights reserved.</p>
+      </div>
+    </footer>
+  </body>
+</html>

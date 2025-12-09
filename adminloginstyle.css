@@ -1,0 +1,165 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('archive.jpg.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.5; /* Adjust opacity here */
+    z-index: -1; /* Ensure the background is behind the body content */
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column; /* Align items horizontally */
+    align-items: center;
+    justify-content: center;
+}
+
+/* Adjust the form container for a better layout */
+.container {
+    height: 60vh;
+    position: relative;
+    width:400px; /* Adjust form width */
+    margin: 100px auto; /* Centers the form on the page */
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+/* Centering and overlaying the circle with user icon */
+.icon-circle {
+    width: 100px; /* Circle width */
+    height: 100px; /* Circle height */
+    background-color: #d63600; /* Circle background color */
+    border-radius: 50%; /* Makes the div a circle */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: -60px; /* Moves half of the circle upwards to overlay on the form */
+    left: 50%;
+    transform: translateX(-50%); /* Centers the circle horizontally */
+    border: 3px solid #ccc; /* Circle border */
+}
+
+/* Style for the user icon inside the circle */
+.user-icon {
+    font-size: 50px;
+    color:white; /* Icon color */
+}
+
+/* Ensures the form has some top padding to accommodate the circle */
+form {
+    position: relative; /* To position the circle inside the form */
+    padding-top: 60px;
+}
+
+/* Form header styling */
+.form_header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+label{
+    font-size: 15px;
+}
+
+input[type="text"], input[type="password"] {
+    padding: 5px; /* Increased padding for input fields */
+    margin: 10px 0;
+    border: none;
+    border-bottom: 1px solid #000000; /* Add a bottom border */
+}   
+
+/* Change bottom border color on focus */
+input:focus {
+    border-bottom: 1px solid #000000; /* Darker shade on focus */
+    outline: none; /* Ensures no outline is shown when focused */
+}
+.input-container {
+    position: relative;
+    width: 100%;
+}
+
+.input-container input {
+    width: 100%;
+    padding-right: 40px; /* Add enough space for the eye icon */
+    box-sizing: border-box; /* Ensures padding is included in the element's total width */
+}
+.eye-icon {
+    position: absolute;
+    right: 10px; /* Position the icon inside the input */
+    top: 60%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 15px;
+    color: #666;
+    z-index: 2; /* Ensure the eye icon stays above the input field */
+}
+
+.eye-icon:hover{
+    color: black;
+}
+
+
+/* Flex container for centering the button */
+.form-actions {
+    float: right;
+    display: flex;
+    justify-content: right; /* Centers the button horizontally */
+    margin-top: 15px; /* Adds some space above the button */
+}
+
+/* Button styling */
+button {
+    padding: 10px 20px;
+    background-color: #d63600; /* Button background color */
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #bd000a; /* Darker shade on hover */
+}
+
+/* Flex container for aligning the forgot password and sign up links */
+.links-container {
+    display: flex;
+    justify-content: space-between; /* Spaces the elements to the edges */
+    align-items: center; /* Aligns vertically in the center */
+    margin-top: 20px;
+}
+
+/* Optional styling to make sure the text fits well */
+.links-container a {
+    color: #e73b01; /* Link color */
+    text-decoration: none;
+    font-size: 15px;
+}
+
+.links-container a:hover {
+    text-decoration: underline; /* Underline on hover for better interaction */
+}

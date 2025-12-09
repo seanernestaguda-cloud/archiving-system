@@ -1,0 +1,1397 @@
+* {
+    margin: 0;
+    padding: 0 auto;
+    box-sizing: border-box;
+    height: auto;
+}
+
+
+body {
+    margin: auto;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #e2e2e2;
+    font-size: 14px;
+}
+
+.dashboard {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar - Default (Expanded) */
+.sidebar {
+    width: 250px;
+    background-color: #bd000a;
+    color: #fff;
+    padding-top: 20px;
+    transition: width 0.3s ease-in-out;
+    position: fixed;
+    /* Keeps sidebar fixed */
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 20;
+    /* Sidebar on top of the header */
+    height: 100vh;
+    /* Ensure it takes up the full viewport height */
+    overflow-y: auto;
+}
+
+/* Sidebar - Collapsed State */
+.sidebar.collapsed {
+    width: 60px;
+    /* Only icons visible */
+}
+
+.sidebar nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar nav ul li i {
+    margin: 5px;
+    padding: 15px 10px;
+    text-align: center;
+}
+
+.sidebar nav ul li a {
+    text-decoration: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease-in-out;
+    font-size: 14px;
+}
+
+.sidebar nav ul li a:hover {
+    background-color: #810000;
+}
+
+/* Hide Text in Collapsed State */
+.sidebar.collapsed nav ul li a span {
+    display: none;
+    /* Hide text */
+}
+
+.archive-text {
+    margin: 10px;
+}
+
+/* Hide "Maintenance" text when collapsed */
+.sidebar.collapsed .archive-text {
+    display: none;
+}
+
+/* Center Icons in Collapsed State */
+.sidebar.collapsed nav ul li a i {
+    margin-right: 0;
+    text-align: center;
+    flex: 1;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 10px;
+    /* Adjust scrollbar width */
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #810000;
+    /* Adjust scrollbar color */
+    border-radius: 8px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #5a0000;
+    /* Darker shade on hover */
+}
+
+
+.main-content {
+    flex-grow: 1;
+    margin-left: 250px;
+    margin-top: 60px;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+
+.main-content.expanded {
+    margin-left: 250px;
+    /* Default margin with expanded sidebar */
+}
+
+.main-content.collapsed {
+    margin-left: 60px;
+    /* Adjusted margin for collapsed sidebar */
+}
+
+
+.header .toggle-sidebar-btn {
+    margin-left: 10px;
+    /* Adjust if necessary */
+}
+
+
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffa700;
+    padding: 10px 20px;
+    position: fixed;
+    /* Keeps header fixed */
+    top: 0;
+    left: 10;
+    width: 100%;
+    position: fixed;
+    z-index: 1000;
+}
+
+/* Header Text (h1 or h2) */
+.header h2 {
+    color: white;
+    text-align: left;
+    flex-grow: 1;
+}
+
+/* Profile Icon Positioned Upper Right */
+.user-icon {
+    display: flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+}
+
+
+.fa-fet-down {
+    margin: 5px;
+}
+
+.user-icon p {
+    color: black;
+    font-weight: bold;
+    font-size: 15px;
+
+}
+
+.user-icon i {
+    color: black;
+}
+
+/* Profile Dropdown */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.user-icon {
+    display: flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.user-icon p {
+    margin-left: 10px;
+    font-size: 18px;
+}
+
+/* Profile Dropdown */
+.dropdown {
+    position: fixed;
+    display: inline-block;
+}
+
+
+/* Dropdown content */
+.dropdown-content {
+    display: none;
+    position: fixed;
+    right: 0;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+/* Show dropdown when clicked */
+.show {
+    display: block;
+}
+
+/* Toggle Sidebar Button */
+.toggle-sidebar-btn {
+    margin-right: 20px;
+    background: none;
+    border: none;
+    color: rgb(70, 70, 70);
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+
+/* Sidebar - Hidden State */
+.sidebar.hidden {
+    width: 0;
+    overflow: hidden;
+    transition: width 0.3s ease-in-out;
+}
+
+/* Adjust Main Content when Sidebar is Hidden */
+.main-content.expanded {
+    margin-left: 0 250px;
+    transition: margin-left 0.3s ease-in-out;
+}
+
+.archive-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: #fff;
+
+}
+
+.archive-table th,
+.archive-table td {
+    padding: 8px 5px;
+    font-size: 13px;
+     border: 1px solid #e0e0e0;
+     white-space:normal;
+}
+
+.archive-table td {
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.archive-table th {
+    background: #003D73;
+    color: #fff;
+    text-align: center;
+}
+
+.archive-table tr:nth-child(even) {
+    background: #f7fafd;
+}
+
+.archive-table tr:hover {
+    background: #f0f0f0;
+}
+
+
+
+
+/* Close button */
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 15px;
+}
+
+.close-btn:hover {
+    color: #ffcccb;
+}
+
+/* Animation for notification slide-in */
+@keyframes slideIn {
+    from {
+        top: -80px;
+        /* Start above the screen */
+        opacity: 0;
+    }
+
+    to {
+        top: 20px;
+        /* End at the specified top position */
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    max-width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.modal-content h3 {
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 24px;
+    color: #333;
+}
+
+.modal-content label {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="datetime-local"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s;
+}
+
+.modal-content input[type="file"] {
+    border: 1px solid #003D73;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s;
+}
+
+.modal-content input[type="text"]:focus,
+.modal-content input[type="datetime-local"]:focus {
+    border-color: #003D73;
+    outline: none;
+}
+
+.modal-btn {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 10px;
+}
+
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 25px;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.fa-caret-down {
+    margin: 5px;
+}
+
+
+.report-dropdown .fa-chevron-right {
+    font-size: 13px;
+    transition: transform 0.3s ease;
+    /* Smooth rotation animation */
+    margin-left: 50px;
+}
+
+.report-dropdown.show .fa-chevron-right {
+    transform: rotate(90deg);
+    /* Rotate the caret when dropdown is open */
+}
+
+.upload-button {
+    margin-right: 5px;
+    background-color: #003D73;
+    /* Green background */
+    color: white;
+    /* White text */
+    padding: 10px 20px;
+    /* Adjusted padding for better clickability */
+    border: none;
+    /* No border */
+    /* Rounded corners */
+    cursor: pointer;
+    /* Pointer cursor on hover */
+    font-size: 14px;
+    border-radius: 3px;
+}
+
+.upload-button i {
+    font-size: 14px;
+}
+
+.upload-button:hover {
+    background-color: #011e38;
+}
+
+#uploadModal {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Semi-transparent background */
+    z-index: 1000;
+    padding: 20px;
+    /* Ensures space around modal */
+    align-items: center;
+    justify-content: center;
+}
+
+.action-button-container {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.action-button-container button {
+    border-style: hidden;
+    margin: 0px;
+    /* Add space between buttons */
+    padding: 10px 12px;
+    /* Adjust padding as needed */
+    font-size: 13px;
+    /* Font size */
+    border-radius: 0px;
+    /* Rounded corners */
+    cursor: pointer;
+    /* Pointer cursor on hover */
+}
+
+.view-btn,
+.edit-btn {
+    background-color: #003D73;
+    /* Blue background */
+    color: white;
+}
+
+.download-btn {
+    background-color: green;
+    /* Blue background */
+    color: white;
+}
+
+.download-btn:hover {
+    background-color: rgb(0, 81, 0);
+    /* Blue background */
+    color: white;
+}
+
+.view-btn:hover,
+.edit-btn:hover {
+    background-color: #011e38;
+}
+
+
+.delete-btn {
+    background-color: #bd000a;
+    /* Red background */
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #810000;
+}
+
+
+/* Animation for Sidebar Text */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+        /* Slide from the left */
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+        /* Final position */
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+        /* Starting position */
+    }
+
+    to {
+        opacity: 0;
+        transform: translateX(-20px);
+        /* Slide out to the left */
+    }
+}
+
+/* Apply animation to sidebar text when expanded */
+.sidebar nav ul li a span {
+    animation: fadeIn 0.1s ease-in-out;
+}
+
+/* Apply animation to sidebar text when collapsed */
+.sidebar.collapsed nav ul li a span {
+    animation: fadeOut 0.1s ease-in-out;
+}
+
+/* Add hover effect for individual items to emphasize the animation */
+.sidebar nav ul li a:hover span {
+    animation: fadeIn 0.5s ease-in-out;
+    /* Ensure the text fades back in on hover */
+}
+
+.header-right {
+    position: fixed;
+    /* Make it fixed at the top-right */
+    right: 20px;
+    /* Adjust as needed for positioning */
+    top: 10px;
+    /* Adjust as needed for positioning */
+    z-index: 1000;
+    /* Ensure it stays on top of other elements */
+    display: flex;
+    align-items: center;
+}
+
+.report-details-modal {
+    display: none;
+    /* Default hidden */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Semi-transparent background */
+    align-items: center;
+    /* Center vertically */
+    justify-content: center;
+    /* Center horizontally */
+    z-index: 1000;
+}
+
+/* Modal Content Styles */
+.modal-content {
+    background-color: #ffffff;
+    /* White background for content */
+    color: #333333;
+    /* Dark text for good contrast and readability */
+    padding: 30px;
+    /* More padding for a formal look */
+    border-radius: 8px;
+    width: 50%;
+    /* Adjust width for better visual balance */
+    max-height: 80%;
+    /* Limit height */
+    overflow-y: auto;
+    /* Allow scrolling if content overflows */
+    box-sizing: border-box;
+    position: relative;
+    /* Position for the close button */
+    border: 2px solid #003D73;
+    /* Dark teal border for a formal, professional feel */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    /* Soft shadow for depth */
+    font-family: 'Arial', sans-serif;
+    /* Clean, professional font */
+}
+
+
+/* Close Button Style */
+.close-btn {
+    font-size: 28px;
+    color: #003D73;
+    /* Teal color for consistency with the theme */
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    /* Smooth transition for hover effect */
+}
+
+.close-btn:hover {
+    color: #011e38;
+    /* Red color on hover for a clear indication */
+}
+
+/* Modal Title (h3) Style */
+.modal-content h3 {
+    margin-top: 0;
+    font-size: 20px;
+    color: #003D73;
+    font-weight: 600;
+    /* Make the title bold */
+    margin-bottom: 20px;
+    /* Space below the title */
+    text-align: left;
+    /* Left-align the header */
+}
+
+/* Paragraph Style */
+.modal-content p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #555;
+    /* Slightly lighter text for body content */
+    text-align: left;
+    /* Left-align the paragraph text */
+    margin-bottom: 15px;
+    /* Add space between paragraphs */
+}
+
+/* For Details Section */
+.modal-content .details-section {
+    margin-top: 20px;
+    margin-bottom: 5px;
+}
+
+/* Buttons Inside Modal (e.g., if you have buttons for actions) */
+.modal-content .action-button {
+    background-color: #003D73;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    /* Smooth background change */
+}
+
+.modal-content .action-button:hover {
+    background-color: #011e38;
+}
+
+/* Scrollable Modal Content */
+.report-details-modal .modal-content {
+    max-height: 100vh;
+    /* 80% of the viewport height */
+    overflow-y: auto;
+    /* Scroll if content exceeds this height */
+}
+
+
+/* Adding Hover Effect to Modal Content */
+.modal-content:hover {
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.15);
+    /* Subtle hover effect for depth */
+}
+
+
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-top: solid 5px #003D73;
+    padding: 20px;
+    margin: 20px;
+    overflow: hidden;
+}
+
+
+.card h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 24px;
+    color: #003D73;
+    padding-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+
+
+.filter {
+    margin: 0px;
+    padding: 5px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.filter label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.filter select {
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.filter select:focus {
+    border-color: #007bff;
+}
+
+
+
+.dropdown-btn i.fa-chevron-down {
+    margin-left: 50px;
+    transition: transform 0.3s ease;
+}
+
+.dropdown-btn.active i.fa-chevron-down {
+    transform: rotate(180deg);
+    /* Rotate the chevron when active */
+}
+
+.fa-chevron-down {
+    font-size: 10px;
+}
+
+/* Dropdown and profile styles */
+.dropdown-content {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 61, 115, 0.10);
+    padding: 8px 0;
+}
+
+.dropdown-content a {
+    color: #003D73;
+    padding: 10px 18px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.dropdown-content a:hover {
+    background: #e6f0fa;
+    color: #00509e;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Style for the buttons */
+.dropdown button,
+.action-btn {
+    background-color: #003D73;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+}
+
+.dropdown button:hover,
+.action-btn:hover {
+    background-color: #011e38;
+}
+
+/* Top controls flex container */
+.top-controls {
+    display: flex;
+    justify-content: flex-start;
+    /* Aligns items to the right */
+    align-items: center;
+    /* Center vertically */
+    margin-bottom: 20px;
+    /* Space below */
+}
+
+.create-new-button {
+    margin-right: 5px;
+    background-color: #003D73;
+    /* Green background */
+    color: white;
+    /* White text */
+    padding: 10px 20px;
+    /* Adjusted padding for better clickability */
+    border: none;
+    /* No border */
+    /* Rounded corners */
+    cursor: pointer;
+    /* Pointer cursor on hover */
+    font-size: 14px;
+    /* Font size */
+    border-radius: 3px;
+}
+
+.create-new-button i {
+    margin-right: 10px;
+    font-size: 15px;
+}
+
+.create-new-button:hover {
+    background-color: #011e38;
+    /* Darker green on hover */
+    transition: background-color 0.3s ease;
+    /* Smooth transition */
+}
+
+#victims ul {
+    list-style-type: disc;
+    /* Add bullets */
+    padding-left: 20px;
+    /* Indent the list */
+    margin: 0;
+}
+
+#victims {
+    list-style-type: disc;
+    /* Keeps the bullets */
+    padding-left: 20px;
+    /* Indentation */
+    margin: 0;
+    /* Removes default margin */
+    height: 150px;
+    /* Adjust the height as per your design */
+    width: 100%;
+    /* Full width to fill the modal */
+    resize: none;
+    /* Disables resizing */
+    overflow-y: auto;
+    /* Allows scrolling if content overflows */
+    background-color: #f9f9f9;
+    /* Light gray background */
+    border: 1px solid #ccc;
+    /* Light border */
+    border-radius: 4px;
+    /* Rounded corners */
+    padding: 10px;
+    /* Padding inside the textarea */
+    font-size: 15px;
+    /* Slightly smaller text */
+    font-family: 'Arial', sans-serif;
+    /* Clean font */
+    color: #333;
+    /* Dark text for readability */
+}
+
+#victims[readonly] {
+    background-color: #f1f1f1;
+    /* Light background for readonly state */
+    cursor: not-allowed;
+    /* Changes cursor to show it's not editable */
+}
+
+#victims li {
+    margin-bottom: 5px;
+    /* Add spacing between items */
+}
+
+
+
+.message {
+    position: fixed;
+    color: white;
+    background-color: #003D73;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    z-index: 9999;
+    opacity: 0;
+    /* Initially hidden */
+    animation: fadeInOut 4s ease forwards;
+    /* Animation added */
+
+}
+
+.message.error {
+    background-color: #bd000a;
+    /* Red for error */
+}
+
+.message.success {
+    background-color: #003D73;
+    /* Green for success */
+}
+
+/* Fade-in and fade-out animation */
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 1;
+        /* Fade in */
+    }
+
+    80% {
+        opacity: 1;
+        /* Stay visible */
+    }
+
+    100% {
+        opacity: 0;
+        /* Fade out */
+    }
+}
+
+/* Success Message */
+.message.success {
+    position: fixed;
+    color: white;
+    background-color: #003D73;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    z-index: 9999;
+    opacity: 0;
+    /* Initially hidden */
+    animation: fadeInOut 4s ease forwards;
+    /* Animation added */
+}
+
+
+/* Error Message */
+.message.error {
+    position: fixed;
+    color: white;
+    background-color: #bd000a;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    z-index: 9999;
+    opacity: 0;
+    /* Initially hidden */
+    animation: fadeInOut 4s ease forwards;
+    /* Animation added */
+}
+
+.confirm-delete-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.5s ease;
+    /* Animation effect */
+}
+
+.confirm-delete-modal .modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 300px;
+    animation: slideIn 0.5s ease;
+    /* Animation effect */
+
+}
+
+.confirm-delete-modal button {
+    padding: 10px 20px;
+    margin: 0px;
+    cursor: pointer;
+}
+
+.confirm-delete-modal button.confirm-btn {
+    border: hidden;
+    background-color: #bd000a;
+    color: white;
+}
+
+.confirm-delete-modal button.confirm-btn:hover {
+    background-color: #810000;
+}
+
+.confirm-delete-modal button.cancel-btn {
+    border: hidden;
+    background-color: #003D73;
+    color: white;
+}
+
+.confirm-delete-modal button.cancel-btn:hover {
+    background-color: #011e38;
+}
+
+.report-dropdown-content {
+    display: block;
+    /* Always block to enable height transitions */
+    overflow: hidden;
+    /* Ensure content doesn't spill during animation */
+    max-height: 0;
+    /* Start with 0 height */
+    transition: max-height 0.3s ease-out;
+    /* Smooth transition effect */
+    background-color: #bd000a;
+    padding: 0;
+    /* Padding will be added dynamically when visible */
+    border: 1px hidden;
+    border-radius: 5px;
+    margin-top: 10px;
+    visibility: hidden;
+    /* Initially hidden */
+}
+
+.report-dropdown-content li {
+    padding: 0px;
+    list-style: none;
+}
+
+.report-dropdown-content li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+}
+
+.report-dropdown-content li a:hover {
+    background-color: #444;
+    color: #fff;
+}
+
+.report-dropdown.show .report-dropdown-content {
+    max-height: 500px;
+    /* Large enough to fit all dropdown items */
+    padding: 10px;
+    /* Add padding only when visible */
+    visibility: visible;
+    /* Make visible */
+    transition: max-height 0.3s ease-in, padding 0.3s ease-in;
+}
+
+h4 {
+    text-align: left;
+    padding-bottom: 10px;
+    margin-top: 20px;
+}
+
+/* Delete Confirmation Modal Styles */
+.delete-confirmation-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Semi-transparent background */
+    z-index: 1000;
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-confirmation-modal .modal-content {
+    background-color: #ffffff;
+    color: #333;
+    padding: 30px;
+    border-radius: 8px;
+    width: 40%;
+    text-align: center;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.delete-confirmation-modal .action-button {
+    background-color: #003D73;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    font-size: 16px;
+}
+
+.delete-confirmation-modal .action-button:hover {
+    background-color: #011e38;
+}
+
+.entries-info {
+    margin-top: 15px;
+    text-align: left;
+    /* Align text to the left */
+    font-size: 14px;
+    color: #555;
+}
+
+.card .entries-info {
+    position: relative;
+    bottom: 0;
+    left: 0;
+    padding: 10px;
+}
+
+.footer {
+    text-align: right;
+    padding: 10px;
+    background-color: white;
+    color: rgb(154, 154, 154);
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+.footer p {
+    margin: 0;
+    font-size: 14px;
+}
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Hide default file input */
+input[type="file"] {
+    display: none;
+}
+
+/* Custom file upload button */
+.file-label {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: white;
+    color: #003D73;
+    border-radius: 5px;
+    border: 1px solid #003D73;
+    text-align: center;
+    width: 48%
+}
+
+/* Hover effect */
+.file-label:hover {
+    background-color: #002D57;
+    /* Darker Blue */
+    color: white;
+}
+
+/* Display selected file name */
+.file-name {
+    display: block;
+    margin-top: 5px;
+    font-size: 14px;
+    color: #333;
+    padding: 10px;
+    width: 48%;
+    border: 1px #333;
+}
+
+fieldset {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.pagination-btn {
+    display: inline-block;
+    padding: 6px 14px;
+    margin: 0 2px;
+    background: #f0f0f0;
+    color: #003D73;
+    border-radius: 4px;
+    text-decoration: none;
+    border: 1px solid #ccc;
+    font-weight: bold;
+}
+
+.pagination-btn.active,
+.pagination-btn:hover {
+    background: #003D73;
+    color: #fff;
+    border-color: #003D73;
+}
+
+.report-type-options {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 10px;
+}
+
+.report-type-btn {
+    background: #f4f8fb;
+    border: 2px solid #003D73;
+    border-radius: 8px;
+    padding: 12px 18px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #003D73;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s, border-color 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.report-type-btn input[type="radio"] {
+    display: none;
+}
+
+.report-type-btn i {
+    font-size: 20px;
+}
+
+.report-type-btn.selected,
+.report-type-btn:hover {
+    background: #e3f2fd;
+    border-color: #0056b3;
+}
+
+#spot_report_input,
+#progress_report_input,
+#final_report_input {
+    transition: all 0.3s;
+    margin-top: 10px;
+}
+
+.tab-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.tab-btn {
+    background: #003D73;
+    color: #fff;
+    border: none;
+    border-radius: 4px 4px 0 0;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.tab-btn.active {
+    background: #002D57;
+    border-bottom: 2px solid #fff;
+}
+
+.tab-content {
+    border-top: 2px solid #003D73;
+    padding-top: 10px;
+}
+
+.btn[disabled],
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+.drop-area {
+    display: block;
+    cursor: pointer;
+    padding: 24px 0;
+}
+
+.upload-icon {
+    font-size: 32px;
+    color: #003D73;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.upload-btn {
+    background: #003D73;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 24px;
+    margin-top: 12px;
+    cursor: pointer;
+}
+
+.upload-btn:hover {
+    background: #002D57;
+}
+
+.max-size-info {
+    font-size: 14px;
+    color: #555;
+    margin-top: 10px;
+}
+
+#file-list-photos,
+#file-preview-narrative,
+#file-preview-progress,
+#file-preview-final {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #003D73;
+}
+
+.drop-area.dragover {
+    background: #e3f2fd;
+    border-color: #003D73;
+}
+
+fieldset {
+    border: 1.5px solid #003D73;
+    border-radius: 8px;
+    margin-bottom: 28px;
+    background: #f6faff;
+    box-shadow: 0 2px 8px rgba(0, 61, 115, 0.04);
+    padding: 18px 22px 12px 22px;
+}
+
+input[type="search"] {
+    border-radius: 20px;
+}
+
+.section-separator.full-bleed {
+    height: 1px;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.436), rgba(0, 0, 0, 0.436), rgba(0, 0, 0, 0.436));
+    border: none;
+    margin: 12px 0 10px;
+    width: calc(100% + 40px);
+    /* expand across left+right padding (2 * 20px) */
+    margin-left: -20px;
+    /* shift left by container padding */
+    box-sizing: border-box;
+}

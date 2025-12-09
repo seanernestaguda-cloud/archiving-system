@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — BFP Archiving System</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: linear-gradient(90deg, #ffa700 0%, #bd000a 100%);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-container {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(211,47,47,0.12);
+      padding: 40px 32px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .login-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #d32f2f;
+      margin-bottom: 24px;
+    }
+    .login-choice {
+      margin: 24px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .btn-login {
+      background: #ffa700;
+      color: #fff;
+      font-weight: 700;
+      border-radius: 8px;
+      padding: 14px 0;
+      font-size: 1.1rem;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: background 0.2s, color 0.2s;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 8px;
+      text-decoration: none;
+      display: block;
+    }
+    .btn-login:hover {
+      background: #ffd54f;
+      color: #d32f2f;
+    }
+    .back-link {
+      display: block;
+      margin-top: 18px;
+      color: #d32f2f;
+      text-decoration: underline;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-title">Login</div>
+    <div class="login-choice">
+      <a href="Admin/adminlogin.php" class="btn-login">Login as Admin</a>
+      <a href="user/userlogin.php" class="btn-login">Login as Staff</a>
+    </div>
+    <a href="index.php" class="back-link">← Back to Home</a>
+  </div>
+</body>
+</html>
