@@ -16,6 +16,13 @@ if ($result_settings && $row_settings = $result_settings->fetch_assoc()) {
     $system_name = $row_settings['system_name'];
 }
 
+// Hash generator for report integrity
+function generateCertificateHash($permit_name, $inspection_establishment, $owner, $inspection_address, $inspection_date)
+{
+    $data = $permit_name . '|' . $inspection_establishment . '|' . $owner . '|' . $inspection_address . '|' . $inspection_date;
+    return hash('sha256', $data);
+}
+
 $username = $_SESSION['username'];
 $sql_user = "SELECT avatar FROM users WHERE username = ? LIMIT 1";
 $stmt_user = $conn->prepare($sql_user);
@@ -74,6 +81,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $possible_problems = $_POST['possible_problems'];
     $hazardous_materials = $_POST['hazardous_materials'];
 
+    // Generate hash for certificate integrity
+    $report_hash = generateCertificateHash($permit_name, $inspection_establishment, $owner, $inspection_address, $inspection_date);
+
     $upload_dir = '../uploads/'; // Make sure this directory exists and is writable
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0777, true);
@@ -104,17 +114,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // Prepare an SQL statement to insert the data
+
     $stmt = $conn->prepare("INSERT INTO fire_safety_inspection_certificate 
     (permit_name, inspection_establishment, owner, inspection_address, inspection_date, establishment_type, inspection_purpose, 
     fire_alarms, fire_extinguishers, emergency_exits, sprinkler_systems, fire_drills, exit_signs, electrical_wiring, emergency_evacuations, inspected_by,
     contact_person, contact_number, number_of_occupants, nature_of_business, number_of_floors, floor_area, classification_of_hazards, building_construction, possible_problems, hazardous_materials,
-    application_form, proof_of_ownership, fire_safety_inspection_checklist, building_plans, fire_safety_inspection_certificate, occupancy_permit, business_permit, uploader, department)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"); // 35 placeholders
+    application_form, proof_of_ownership, fire_safety_inspection_checklist, building_plans, fire_safety_inspection_certificate, occupancy_permit, business_permit, uploader, department, report_hash)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"); // 36 placeholders
 
     // Insert default value for department if missing
     $department = isset($_SESSION['department']) && !empty($_SESSION['department']) ? $_SESSION['department'] : 'N/A';
     $stmt->bind_param(
-        "sssssssssssssssssssssssssssssssssss", // 35 "s"
+        "ssssssssssssssssssssssssssssssssssss", // 36 "s"
         $permit_name,
         $inspection_establishment,
         $owner,
@@ -149,7 +160,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $file_paths['occupancy_permit'],
         $file_paths['business_permit'],
         $username,
-        $department
+        $department,
+        $report_hash
     );
 
     // Execute the statement

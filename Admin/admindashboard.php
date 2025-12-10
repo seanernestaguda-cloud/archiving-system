@@ -25,8 +25,20 @@ if ($result_user && $row_user = $result_user->fetch_assoc()) {
 }
 $stmt->close();
 
-$sql = "SELECT fire_types, COUNT(*) AS fire_count FROM fire_incident_reports WHERE deleted_at IS NULL GROUP BY fire_types ORDER BY fire_count DESC";
-$result = $conn->query($sql);
+
+// Fetch all fire types from fire_types table
+$sql_fire_types = "SELECT fire_types FROM fire_types ORDER BY fire_types ASC";
+$result_fire_types = $conn->query($sql_fire_types);
+
+// Fetch fire incident counts per type
+$fire_type_counts = array();
+$sql_counts = "SELECT fire_types, COUNT(*) AS fire_count FROM fire_incident_reports WHERE deleted_at IS NULL GROUP BY fire_types";
+$result_counts = $conn->query($sql_counts);
+if ($result_counts && $result_counts->num_rows > 0) {
+    while ($row = $result_counts->fetch_assoc()) {
+        $fire_type_counts[strtolower(trim($row['fire_types']))] = $row['fire_count'];
+    }
+}
 
 // Fetch total number of reports
 $sql_reports = "SELECT COUNT(*) AS total_reports FROM fire_incident_reports WHERE deleted_at IS NULL";
@@ -546,13 +558,15 @@ $conn->close();
                     <h3>Fire Causes</h3>
                     <div class="card-container dashboard-grid">
                         <?php
-                        if ($result && $result->num_rows > 0) {
-                            while ($row = $result->fetch_assoc()) {
+                        // Show all fire types from fire_types table
+                        if ($result_fire_types && $result_fire_types->num_rows > 0) {
+                            while ($row = $result_fire_types->fetch_assoc()) {
                                 $fireTypeRaw = $row['fire_types'];
-                                $fireType = strtolower($fireTypeRaw);
+                                $fireType = strtolower(trim($fireTypeRaw));
                                 $icon = 'fa-fire';
                                 $displayType = htmlspecialchars($fireTypeRaw);
-                                if (is_null($fireTypeRaw) || trim($fireTypeRaw) === '') {
+                                // Icon logic
+                                if (is_null($fireTypeRaw) || $fireType === '') {
                                     $icon = 'fa-search';
                                     $displayType = 'Under Investigation';
                                 } else {
@@ -605,14 +619,23 @@ $conn->close();
                                             $icon = 'fa-fire';
                                     }
                                 }
+                                $incidentCount = isset($fire_type_counts[$fireType]) ? $fire_type_counts[$fireType] : 0;
                         ?>
                                 <div class="dashboard-card">
                                     <i class="fa-solid <?php echo $icon; ?>"></i>
                                     <h2><?php echo $displayType; ?></h2>
-                                    <p class="card-number"><?php echo $row['fire_count']; ?> incident(s)</p>
+                                    <p class="card-number"><?php echo $incidentCount; ?> incident(s)</p>
                                 </div>
-                        <?php
+                            <?php
                             }
+                        } else {
+                            ?>
+                            <div class="dashboard-card">
+                                <i class="fa-solid fa-search"></i>
+                                <h2>Under Investigation</h2>
+                                <p class="card-number">0 incident(s)</p>
+                            </div>
+                        <?php
                         }
                         ?>
                     </div>

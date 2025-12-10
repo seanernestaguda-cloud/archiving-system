@@ -7,6 +7,13 @@ $sql = "SELECT * FROM settings LIMIT 1";
 $result = $conn->query($sql);
 $settings = $result ? $result->fetch_assoc() : [];
 
+// Hash generator for report integrity
+function generateReportHash($report_title, $fire_location, $incident_date, $establishment)
+{
+    $data = $report_title . '|' . $fire_location . '|' . $incident_date . '|' . $establishment;
+    return hash('sha256', $data);
+}
+
 $username = $_SESSION['username'];
 $sql_user = "SELECT avatar FROM users WHERE username = ? LIMIT 1";
 $stmt_user = $conn->prepare($sql_user);
@@ -61,6 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $department = !empty($dept_row['department']) ? $dept_row['department'] : 'N/A';
     }
     $dept_stmt->close();
+
+    // Generate hash for report integrity
+    $report_hash = generateReportHash($report_title, $fire_location, $incident_date, $establishment);
 
     // Handling file uploads
     $documentation_photos = [];
@@ -128,11 +138,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
     // Save report and uploaded files to the database, now including department
-    $query = "INSERT INTO fire_incident_reports (report_title, caller_name, responding_team, fire_location, street, purok, municipality, incident_date, arrival_time, fireout_time, establishment, victims, firefighters, property_damage, fire_types, alarm_status, occupancy_type, uploader, department, documentation_photos, narrative_report, progress_report, final_investigation_report)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO fire_incident_reports (report_title, caller_name, responding_team, fire_location, street, purok, municipality, incident_date, arrival_time, fireout_time, establishment, victims, firefighters, property_damage, fire_types, alarm_status, occupancy_type, uploader, department, documentation_photos, narrative_report, progress_report, final_investigation_report, report_hash)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = mysqli_prepare($conn, $query);
     $documentation_photos = implode(',', $documentation_photos);  // Store multiple photo paths as a comma-separated string
-    mysqli_stmt_bind_param($stmt, "sssssssssssssssssssssss", $report_title, $caller_name, $responding_team, $fire_location, $street, $purok, $municipality, $incident_date, $arrival_time, $fireout_time, $establishment, $victims, $firefighters, $property_damage, $fire_types, $alarm_status, $occupancy_type, $uploader, $department, $documentation_photos, $narrative_report, $progress_report, $final_investigation_report);
+    mysqli_stmt_bind_param($stmt, "ssssssssssssssssssssssss", $report_title, $caller_name, $responding_team, $fire_location, $street, $purok, $municipality, $incident_date, $arrival_time, $fireout_time, $establishment, $victims, $firefighters, $property_damage, $fire_types, $alarm_status, $occupancy_type, $uploader, $department, $documentation_photos, $narrative_report, $progress_report, $final_investigation_report, $report_hash);
     if (mysqli_stmt_execute($stmt)) {
         $success_message = "Report created successfully!";
         // Log activity with user_type
@@ -636,8 +646,10 @@ mysqli_close($conn);
                 <li class="archive-text">
                     <p>Archives</p>
                 </li>
-                <li><a href="fire_types.php"><i class="fa-solid fa-fire-flame-curved"></i><span> Causes of Fire </span></a></li>
-                <li><a href="barangay_list.php"><i class="fa-solid fa-map-location-dot"></i><span> Barangay List </span></a></li>
+                <li><a href="fire_types.php"><i class="fa-solid fa-fire-flame-curved"></i><span> Causes of Fire
+                        </span></a></li>
+                <li><a href="barangay_list.php"><i class="fa-solid fa-map-location-dot"></i><span> Barangay List
+                        </span></a></li>
                 <li><a href="myarchives.php"><i class="fa-solid fa-box-archive"></i><span> My Archives</span></a></li>
                 <li><a href="archives.php"><i class="fa-solid fa-fire"></i><span> Archives </span></a></li>
 
@@ -648,14 +660,18 @@ mysqli_close($conn);
                         <i class="fa-solid fa-chevron-right"></i>
                     </a>
                     <ul class="report-dropdown-content">
-                        <li><a href="reports_per_barangay.php"><i class="fa-solid fa-chart-column"></i> Reports per Barangay</a></li>
-                        <li><a href="monthly_reports_chart.php"><i class="fa-solid fa-chart-column"></i> Reports per Month </a></li>
-                        <li><a href="year_to_year_comparison.php"><i class="fa-regular fa-calendar-days"></i> Year to Year Comparison </a></li>
+                        <li><a href="reports_per_barangay.php"><i class="fa-solid fa-chart-column"></i> Reports per
+                                Barangay</a></li>
+                        <li><a href="monthly_reports_chart.php"><i class="fa-solid fa-chart-column"></i> Reports per
+                                Month </a></li>
+                        <li><a href="year_to_year_comparison.php"><i class="fa-regular fa-calendar-days"></i> Year to
+                                Year Comparison </a></li>
                     </ul>
                 </li>
 
                 <li class="archive-text"><span>Maintenance</span></li>
-                <li><a href="activity_logs.php"><i class="fa-solid fa-file-invoice"></i><span> Activity Logs </span></a></li>
+                <li><a href="activity_logs.php"><i class="fa-solid fa-file-invoice"></i><span> Activity Logs </span></a>
+                </li>
                 <li><a href="departments.php"><i class="fas fa-users"></i><span> Department List </span></a></li>
                 <li><a href="manageuser.php"><i class="fas fa-users"></i><span> Manage Users </span></a></li>
                 <li><a href="setting.php"><i class="fa-solid fa-gear"></i> <span>Settings</span></a></li>
@@ -667,13 +683,16 @@ mysqli_close($conn);
             <button id="toggleSidebar" class="toggle-sidebar-btn">
                 <i class="fa-solid fa-bars"></i>
             </button>
-            <h2><?php echo htmlspecialchars($settings['system_name'] ?? 'BUREAU OF FIRE PROTECTION ARCHIVING SYSTEM'); ?></h2>
+            <h2><?php echo htmlspecialchars($settings['system_name'] ?? 'BUREAU OF FIRE PROTECTION ARCHIVING SYSTEM'); ?>
+            </h2>
             <div class="header-right">
                 <div class="dropdown">
                     <a href="#" class="user-icon" onclick="toggleProfileDropdown(event)">
                         <!-- Add avatar image here -->
-                        <img src="<?php echo htmlspecialchars($avatar); ?>" alt="Avatar" style="width:40px;height:40px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:0px;">
-                        <p><?php echo htmlspecialchars($_SESSION['username']); ?><i class="fa-solid fa-caret-down"></i></p>
+                        <img src="<?php echo htmlspecialchars($avatar); ?>" alt="Avatar"
+                            style="width:40px;height:40px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:0px;">
+                        <p><?php echo htmlspecialchars($_SESSION['username']); ?><i class="fa-solid fa-caret-down"></i>
+                        </p>
                     </a>
                     <div id="profileDropdown" class="dropdown-content">
                         <a href="myprofile.php"><i class="fa-solid fa-user"></i> View Profile</a>
@@ -688,7 +707,7 @@ mysqli_close($conn);
             </div>
             <?php if (isset($success_message)) { ?>
                 <script>
-                    document.addEventListener('DOMContentLoaded', function() {
+                    document.addEventListener('DOMContentLoaded', function () {
                         showSuccessModal("<?php echo $success_message; ?>", true);
                     });
                 </script>
@@ -720,7 +739,8 @@ mysqli_close($conn);
                     </div>
                 </div>
             </div>
-            <form method="POST" action="create_fire_incident_report.php" enctype="multipart/form-data" id="fireIncidentForm">
+            <form method="POST" action="create_fire_incident_report.php" enctype="multipart/form-data"
+                id="fireIncidentForm">
 
                 <!-- STEP 1: Incident Details -->
                 <div class="form-step" id="step-1">
@@ -728,41 +748,53 @@ mysqli_close($conn);
                         <legend>Incident Details</legend>
                         <!-- ...all your incident detail fields here... -->
                         <div class="form-group" style="width: 45%; display: inline-block;">
-                            <label for="report_title">Report Title <span class="required">*</span><span class="required-text"> required</span></label>
+                            <label for="report_title">Report Title <span class="required">*</span><span
+                                    class="required-text"> required</span></label>
                             <input type="text" id="report_title" name="report_title" required placeholder="Report Name">
                         </div>
                         <div class="form-group" style="width: 45%; display: inline-block;">
-                            <label for="caller_name">Name of the Caller <span class="required">*</span><span class="required-text"> required</span></label>
+                            <label for="caller_name">Name of the Caller <span class="required">*</span><span
+                                    class="required-text"> required</span></label>
                             <input type="text" id="caller_name" name="caller_name" required placeholder="Caller Name">
                         </div>
                         <div class="form-group-container"></div>
                         <div class="form-group" style="width: 45%; display: inline-block;">
-                            <label for="responding_team">Responding Team <span class="required">*</span><span class="required-text"> required</span></label>
-                            <input type="text" id="responding_team" name="responding_team" class="form-control" placeholder="Responding Team" required>
+                            <label for="responding_team">Responding Team <span class="required">*</span><span
+                                    class="required-text"> required</span></label>
+                            <input type="text" id="responding_team" name="responding_team" class="form-control"
+                                placeholder="Responding Team" required>
                         </div>
 
                         <div class="form-group" style="width: 45%; display: inline-block;">
-                            <label for="establishment">Establishment Burned <span class="required">*</span><span class="required-text"> required</span></label>
-                            <input type="text" id="establishment" name="establishment" class="form-control" placeholder="Name of the Establishment" required>
+                            <label for="establishment">Establishment Burned <span class="required">*</span><span
+                                    class="required-text"> required</span></label>
+                            <input type="text" id="establishment" name="establishment" class="form-control"
+                                placeholder="Name of the Establishment" required>
                         </div>
                         <hr class="section-separator full-bleed">
                         <h4 style="text-align: center;"> Fire Location </h4>
                         <hr class="section-separator full-bleed">
                         <div class="form-group" style="width: 45%; display: inline-block;">
-                            <label for="street">Street <span class="required">*</span><span class="required-text"> required</span></label>
-                            <input type="text" id="street" name="street" class="form-control" placeholder="street" required>
+                            <label for="street">Street <span class="required">*</span><span class="required-text">
+                                    required</span></label>
+                            <input type="text" id="street" name="street" class="form-control" placeholder="street"
+                                required>
                         </div>
                         <div class="form-group" style="width: 45%; display: inline-block;">
-                            <label for="purok">Purok <span class="required">*</span><span class="required-text"> required</span></label>
-                            <input type="text" id="purok" name="purok" class="form-control" placeholder="purok" required>
+                            <label for="purok">Purok <span class="required">*</span><span class="required-text">
+                                    required</span></label>
+                            <input type="text" id="purok" name="purok" class="form-control" placeholder="purok"
+                                required>
                         </div>
                         <div class="form-group-container">
                             <div class="form-group" style="width: 45%; display: inline-block;">
-                                <label for="fire_location">Barangay <span class="required">*</span><span class="required-text"> required</span></label>
+                                <label for="fire_location">Barangay <span class="required">*</span><span
+                                        class="required-text"> required</span></label>
                                 <select id="fire_location" name="fire_location" class="form-control" required>
                                     <option value="" disabled selected>Select Barangay</option>
                                     <?php while ($row = mysqli_fetch_assoc($result_barangays)) { ?>
-                                        <option value="<?php echo $row['barangay_name']; ?>"><?php echo $row['barangay_name']; ?></option>
+                                        <option value="<?php echo $row['barangay_name']; ?>">
+                                            <?php echo $row['barangay_name']; ?></option>
                                     <?php } ?>
                                 </select>
                             </div>
@@ -770,31 +802,41 @@ mysqli_close($conn);
 
 
                             <div class="form-group" style="width: 45%; display: inline-block;">
-                                <label for="municipality">Municipality <span class="required">*</span><span class="required-text"> required</span></label>
-                                <input type="text" id="municipality" name="municipality" class="form-control" placeholder="municipality" required>
+                                <label for="municipality">Municipality <span class="required">*</span><span
+                                        class="required-text"> required</span></label>
+                                <input type="text" id="municipality" name="municipality" class="form-control"
+                                    placeholder="municipality" required>
                             </div>
                             <hr class="section-separator full-bleed">
                             <h4 style="text-align: center;"> Time and Date </h4>
                             <hr class="section-separator full-bleed">
                             <div class="form-group-container">
                                 <div class="form-group" style="width: 30%; display: inline-block;">
-                                    <label for="incident_date">Time and Date Reported <span class="required">*</span><span class="required-text"> required</span></label>
-                                    <input type="datetime-local" id="incident_date" name="incident_date" class="form-control" placeholder="Date" required>
+                                    <label for="incident_date">Time and Date Reported <span
+                                            class="required">*</span><span class="required-text">
+                                            required</span></label>
+                                    <input type="datetime-local" id="incident_date" name="incident_date"
+                                        class="form-control" placeholder="Date" required>
                                 </div>
 
                                 <div class="form-group" style="width: 30%; display: inline-block;">
-                                    <label for="arrival_time">Time of Arrival <span class="required">*</span><span class="required-text"> required</span></label>
-                                    <input type="time" id="arrival_time" name="arrival_time" class="form-control" placeholder="Time of Arrival" required>
+                                    <label for="arrival_time">Time of Arrival <span class="required">*</span><span
+                                            class="required-text"> required</span></label>
+                                    <input type="time" id="arrival_time" name="arrival_time" class="form-control"
+                                        placeholder="Time of Arrival" required>
                                 </div>
 
                                 <div class="form-group" style="width: 30%; display: inline-block;">
-                                    <label for="fireout_time">Time of Fire Out <span class="required">*</span><span class="required-text"> required</span></label>
-                                    <input type="time" id="fireout_time" name="fireout_time" class="form-control" placeholder="Time of Fire Out" required>
+                                    <label for="fireout_time">Time of Fire Out <span class="required">*</span><span
+                                            class="required-text"> required</span></label>
+                                    <input type="time" id="fireout_time" name="fireout_time" class="form-control"
+                                        placeholder="Time of Fire Out" required>
                                 </div>
                                 <hr class="section-separator full-bleed">
                                 <div class="form-group-container">
                                     <div class="form-group" style="width: 45%; display: inline-block;">
-                                        <label for="alarm_status">Alarm Status <span class="required">*</span><span class="required-text"> required</span></label>
+                                        <label for="alarm_status">Alarm Status <span class="required">*</span><span
+                                                class="required-text"> required</span></label>
                                         <select id="alarm_status" name="alarm_status" class="form-control" required>
                                             <option value="" disabled selected>Select Alarm Status</option>
                                             <option value="1st Alarm">1st Alarm</option>
@@ -806,7 +848,9 @@ mysqli_close($conn);
                                     </div>
 
                                     <div class="form-group" style="width: 45%; display: inline-block;">
-                                        <label for="occupancy_type">Type of Occupancy <span class="required">*</span><span class="required-text"> required</span></label>
+                                        <label for="occupancy_type">Type of Occupancy <span
+                                                class="required">*</span><span class="required-text">
+                                                required</span></label>
                                         <select id="occupancy_type" name="occupancy_type" class="form-control" required>
                                             <option value="" disabled selected>Select Type of Occupancy</option>
                                             <option value="Residential">Residential</option>
@@ -822,8 +866,12 @@ mysqli_close($conn);
 
                                 <div class="form-group-container">
                                     <div class="form-group" style="width: 45%; display: inline-block;">
-                                        <label for="property_damage"> Estimated Damage to Property (₱) <span class="required">*</span><span class="required-text"> required</span></label>
-                                        <input type="text" id="property_damage" name="property_damage" class="form-control" placeholder="Amount of Damage to Property" required></i>
+                                        <label for="property_damage"> Estimated Damage to Property (₱) <span
+                                                class="required">*</span><span class="required-text">
+                                                required</span></label>
+                                        <input type="text" id="property_damage" name="property_damage"
+                                            class="form-control" placeholder="Amount of Damage to Property"
+                                            required></i>
                                     </div>
 
                                     <div class="form-group" style="width: 45%; display: inline-block;">
@@ -842,12 +890,18 @@ mysqli_close($conn);
                                     <hr class="section-separator full-bleed">
                                     <div class="form-group" style="width: 45%; display: inline-block;">
                                         <label for="victims">Civilians<br>
-                                            <textarea id="victims" name="victims" rows="10" cols="30" placeholder="Enter each victim on a new line" onfocus="addFirstNumber()" oninput="autoNumber()" style="border-bottom: 1px solid #444;"></textarea><br><br>
+                                            <textarea id="victims" name="victims" rows="10" cols="30"
+                                                placeholder="Enter each victim on a new line" onfocus="addFirstNumber()"
+                                                oninput="autoNumber()"
+                                                style="border-bottom: 1px solid #444;"></textarea><br><br>
                                     </div>
 
                                     <div class="form-group" style="width: 45%; display: inline-block;">
                                         <label for="firefighters">Firefighters<br>
-                                            <textarea id="firefighters" name="firefighters" rows="10" cols="30" placeholder="Enter each firefighter on a new line" onfocus="addFirstNumber()" oninput="autoNumber()" style="border-bottom: 1px solid #444;"></textarea><br><br>
+                                            <textarea id="firefighters" name="firefighters" rows="10" cols="30"
+                                                placeholder="Enter each firefighter on a new line"
+                                                onfocus="addFirstNumber()" oninput="autoNumber()"
+                                                style="border-bottom: 1px solid #444;"></textarea><br><br>
                                     </div>
                     </fieldset>
                     <div class="form-actions">
@@ -868,9 +922,11 @@ mysqli_close($conn);
                                 <div class="drop-area" id="dropAreaPhotos">
                                     <span class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>
                                     <span>Drop images here, or click below!</span>
-                                    <input type="file" id="documentation_photos" name="documentation_photos[]" multiple accept="image/*" style="display:none;">
+                                    <input type="file" id="documentation_photos" name="documentation_photos[]" multiple
+                                        accept="image/*" style="display:none;">
                                 </div>
-                                <button type="button" class="upload-btn" onclick="document.getElementById('documentation_photos').click();">Upload</button>
+                                <button type="button" class="upload-btn"
+                                    onclick="document.getElementById('documentation_photos').click();">Upload</button>
                                 <div class="max-size-info">You can upload images up to a maximum of 2 GB.</div>
                                 <div id="file-list-photos"></div>
                             </div>
@@ -890,9 +946,12 @@ mysqli_close($conn);
                         <div class="form-group" style="margin-bottom: 0;">
                             <label style="font-weight:bold;">Select Attachment</label>
                             <div class="tab-container">
-                                <button type="button" class="tab-btn" onclick="showTab('spot')">Spot Investigation Report</button>
-                                <button type="button" class="tab-btn" onclick="showTab('progress')">Progress Investigation Report</button>
-                                <button type="button" class="tab-btn" onclick="showTab('final')">Final Investigation Report</button>
+                                <button type="button" class="tab-btn" onclick="showTab('spot')">Spot Investigation
+                                    Report</button>
+                                <button type="button" class="tab-btn" onclick="showTab('progress')">Progress
+                                    Investigation Report</button>
+                                <button type="button" class="tab-btn" onclick="showTab('final')">Final Investigation
+                                    Report</button>
                             </div>
                         </div>
 
@@ -904,9 +963,12 @@ mysqli_close($conn);
                                 <div class="drop-area" id="dropAreaSpot">
                                     <span class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>
                                     <span>Drop file here, or click below!</span>
-                                    <input type="file" id="narrative_report" name="narrative_report" accept=".pdf,.doc,.docx,.txt,.rtf" style="display:none;" onchange="previewReport(event, 'file-preview-narrative')">
+                                    <input type="file" id="narrative_report" name="narrative_report"
+                                        accept=".pdf,.doc,.docx,.txt,.rtf" style="display:none;"
+                                        onchange="previewReport(event, 'file-preview-narrative')">
                                 </div>
-                                <button type="button" class="upload-btn" onclick="document.getElementById('narrative_report').click();">Upload</button>
+                                <button type="button" class="upload-btn"
+                                    onclick="document.getElementById('narrative_report').click();">Upload</button>
                                 <div class="max-size-info">You can upload files up to a maximum of 2 GB.</div>
                                 <div id="file-preview-narrative"></div>
                             </div>
@@ -919,9 +981,12 @@ mysqli_close($conn);
                                 <div class="drop-area" id="dropAreaProgress">
                                     <span class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>
                                     <span>Drop file here, or click below!</span>
-                                    <input type="file" id="progress_report" name="progress_report" accept=".pdf,.doc,.docx,.txt,.rtf" style="display:none;" onchange="previewReport(event, 'file-preview-progress')">
+                                    <input type="file" id="progress_report" name="progress_report"
+                                        accept=".pdf,.doc,.docx,.txt,.rtf" style="display:none;"
+                                        onchange="previewReport(event, 'file-preview-progress')">
                                 </div>
-                                <button type="button" class="upload-btn" onclick="document.getElementById('progress_report').click();">Upload</button>
+                                <button type="button" class="upload-btn"
+                                    onclick="document.getElementById('progress_report').click();">Upload</button>
                                 <div class="max-size-info">You can upload files up to a maximum of 2 GB.</div>
                                 <div id="file-preview-progress"></div>
                             </div>
@@ -934,9 +999,12 @@ mysqli_close($conn);
                                 <div class="drop-area" id="dropAreaFinal">
                                     <span class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>
                                     <span>Drop file here, or click below!</span>
-                                    <input type="file" id="final_investigation_report" name="final_investigation_report" accept=".pdf,.doc,.docx,.txt,.rtf" style="display:none;" onchange="previewReport(event, 'file-preview-final')">
+                                    <input type="file" id="final_investigation_report" name="final_investigation_report"
+                                        accept=".pdf,.doc,.docx,.txt,.rtf" style="display:none;"
+                                        onchange="previewReport(event, 'file-preview-final')">
                                 </div>
-                                <button type="button" class="upload-btn" onclick="document.getElementById('final_investigation_report').click();">Upload</button>
+                                <button type="button" class="upload-btn"
+                                    onclick="document.getElementById('final_investigation_report').click();">Upload</button>
                                 <div class="max-size-info">You can upload files up to a maximum of 2 GB.</div>
                                 <div id="file-preview-final"></div>
                             </div>
@@ -951,7 +1019,8 @@ mysqli_close($conn);
                     <fieldset>
                         <legend>Confirm and Submit</legend>
                         <p style="text-align: center;">Please review all information before submitting your report.</p>
-                        <div id="summary" style="margin: 20px 0; padding: 20px; background: #f7f7f7; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+                        <div id="summary"
+                            style="margin: 20px 0; padding: 20px; background: #f7f7f7; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
                             <!-- Summary will be injected here -->
                         </div>
                     </fieldset>
@@ -997,7 +1066,7 @@ mysqli_close($conn);
             if (step === 2) {
                 var step1Fields = document.querySelectorAll('#step-1 [required]');
                 let valid = true;
-                step1Fields.forEach(function(field) {
+                step1Fields.forEach(function (field) {
                     if (!field.value.trim()) {
                         valid = false;
                     }
@@ -1025,76 +1094,76 @@ mysqli_close($conn);
         function showSummary() {
             var summaryDiv = document.getElementById('summary');
             var fields = [{
-                    label: 'Report Title',
-                    id: 'report_title'
-                },
-                {
-                    label: 'Name of the Caller',
-                    id: 'caller_name'
-                },
-                {
-                    label: 'Responding Team',
-                    id: 'responding_team'
-                },
-                {
-                    label: 'Establishment Burned',
-                    id: 'establishment'
-                },
-                {
-                    label: 'Street',
-                    id: 'street'
-                },
-                {
-                    label: 'Purok',
-                    id: 'purok'
-                },
-                {
-                    label: 'Barangay',
-                    id: 'fire_location'
-                },
-                {
-                    label: 'Municipality',
-                    id: 'municipality'
-                },
-                {
-                    label: 'Time and Date Reported',
-                    id: 'incident_date'
-                },
-                {
-                    label: 'Time of Arrival',
-                    id: 'arrival_time'
-                },
-                {
-                    label: 'Time of Fire Out',
-                    id: 'fireout_time'
-                },
-                {
-                    label: 'Alarm Status',
-                    id: 'alarm_status'
-                },
-                {
-                    label: 'Type of Occupancy',
-                    id: 'occupancy_type'
-                },
-                {
-                    label: 'Estimated Damage to Property (₱)',
-                    id: 'property_damage'
-                },
-                {
-                    label: 'Cause of Fire',
-                    id: 'fire_type'
-                },
-                {
-                    label: 'Civilians',
-                    id: 'victims'
-                },
-                {
-                    label: 'Firefighters',
-                    id: 'firefighters'
-                }
+                label: 'Report Title',
+                id: 'report_title'
+            },
+            {
+                label: 'Name of the Caller',
+                id: 'caller_name'
+            },
+            {
+                label: 'Responding Team',
+                id: 'responding_team'
+            },
+            {
+                label: 'Establishment Burned',
+                id: 'establishment'
+            },
+            {
+                label: 'Street',
+                id: 'street'
+            },
+            {
+                label: 'Purok',
+                id: 'purok'
+            },
+            {
+                label: 'Barangay',
+                id: 'fire_location'
+            },
+            {
+                label: 'Municipality',
+                id: 'municipality'
+            },
+            {
+                label: 'Time and Date Reported',
+                id: 'incident_date'
+            },
+            {
+                label: 'Time of Arrival',
+                id: 'arrival_time'
+            },
+            {
+                label: 'Time of Fire Out',
+                id: 'fireout_time'
+            },
+            {
+                label: 'Alarm Status',
+                id: 'alarm_status'
+            },
+            {
+                label: 'Type of Occupancy',
+                id: 'occupancy_type'
+            },
+            {
+                label: 'Estimated Damage to Property (₱)',
+                id: 'property_damage'
+            },
+            {
+                label: 'Cause of Fire',
+                id: 'fire_type'
+            },
+            {
+                label: 'Civilians',
+                id: 'victims'
+            },
+            {
+                label: 'Firefighters',
+                id: 'firefighters'
+            }
             ];
             var html = '<h3 style="text-align:center;">Summary of Entered Details</h3><table style="width:100%;border-collapse:collapse;">';
-            fields.forEach(function(field) {
+            fields.forEach(function (field) {
                 var input = document.getElementById(field.id);
                 var value = '';
                 if (input) {
@@ -1124,20 +1193,20 @@ mysqli_close($conn);
 
             // Attachments
             var attachments = [{
-                    label: 'Spot Investigation Report',
-                    id: 'narrative_report'
-                },
-                {
-                    label: 'Progress Investigation Report',
-                    id: 'progress_report'
-                },
-                {
-                    label: 'Final Investigation Report',
-                    id: 'final_investigation_report'
-                }
+                label: 'Spot Investigation Report',
+                id: 'narrative_report'
+            },
+            {
+                label: 'Progress Investigation Report',
+                id: 'progress_report'
+            },
+            {
+                label: 'Final Investigation Report',
+                id: 'final_investigation_report'
+            }
             ];
             html += '<tr><td colspan="2" style="padding:12px 8px;font-weight:bold;color:#003D73;background:#f0f8ff;">Attachments</td></tr>';
-            attachments.forEach(function(att) {
+            attachments.forEach(function (att) {
                 var input = document.getElementById(att.id);
                 var fileName = '';
                 if (input && input.files && input.files.length > 0) {
@@ -1152,7 +1221,7 @@ mysqli_close($conn);
 
         // Hide 'required' text when field is filled
         function updateRequiredTextVisibility() {
-            document.querySelectorAll('#step-1 [required]').forEach(function(field) {
+            document.querySelectorAll('#step-1 [required]').forEach(function (field) {
                 var label = field.closest('.form-group')?.querySelector('label') || field.closest('div')?.querySelector('label');
                 if (!label) return;
                 var reqText = label.querySelector('.required-text');
@@ -1165,11 +1234,11 @@ mysqli_close($conn);
             });
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Initial check
             updateRequiredTextVisibility();
             // Listen for input on all required fields in step 1
-            document.querySelectorAll('#step-1 [required]').forEach(function(field) {
+            document.querySelectorAll('#step-1 [required]').forEach(function (field) {
                 field.addEventListener('input', updateRequiredTextVisibility);
                 field.addEventListener('change', updateRequiredTextVisibility);
             });
@@ -1182,7 +1251,7 @@ mysqli_close($conn);
         }
 
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             updateStepper(1);
         });
         // Documentation Photos Drag & Drop
@@ -1191,19 +1260,19 @@ mysqli_close($conn);
         const fileListPhotos = document.getElementById('file-list-photos');
         let selectedPhotos = [];
 
-        dropAreaPhotos.addEventListener('dragover', function(e) {
+        dropAreaPhotos.addEventListener('dragover', function (e) {
             e.preventDefault();
             dropAreaPhotos.classList.add('dragover');
         });
-        dropAreaPhotos.addEventListener('dragleave', function(e) {
+        dropAreaPhotos.addEventListener('dragleave', function (e) {
             dropAreaPhotos.classList.remove('dragover');
         });
-        dropAreaPhotos.addEventListener('drop', function(e) {
+        dropAreaPhotos.addEventListener('drop', function (e) {
             e.preventDefault();
             dropAreaPhotos.classList.remove('dragover');
             handlePhotoFiles(e.dataTransfer.files);
         });
-        fileInputPhotos.addEventListener('change', function() {
+        fileInputPhotos.addEventListener('change', function () {
             handlePhotoFiles(fileInputPhotos.files);
         });
 
@@ -1227,7 +1296,7 @@ mysqli_close($conn);
                 div.style.display = 'inline-block';
                 div.style.margin = '5px';
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     div.innerHTML = `
                 <img src="${e.target.result}" style="max-width:120px;max-height:120px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.15);">
                 <button type="button" class="remove-photo-btn" style="position:absolute;top:2px;right:2px;" onclick="removePhoto(${idx})">&times;</button>
@@ -1238,13 +1307,13 @@ mysqli_close($conn);
             });
         }
 
-        window.removePhoto = function(idx) {
+        window.removePhoto = function (idx) {
             selectedPhotos.splice(idx, 1);
             updatePhotoList();
         };
 
         // Before submitting, update the file input with the selected files
-        document.querySelector('form').addEventListener('submit', function(e) {
+        document.querySelector('form').addEventListener('submit', function (e) {
             const dataTransfer = new DataTransfer();
             selectedPhotos.forEach(file => dataTransfer.items.add(file));
             document.getElementById('documentation_photos').files = dataTransfer.files;
@@ -1254,14 +1323,14 @@ mysqli_close($conn);
         function setupDropArea(dropAreaId, inputId, previewId) {
             const dropArea = document.getElementById(dropAreaId);
             const fileInput = document.getElementById(inputId);
-            dropArea.addEventListener('dragover', function(e) {
+            dropArea.addEventListener('dragover', function (e) {
                 e.preventDefault();
                 dropArea.classList.add('dragover');
             });
-            dropArea.addEventListener('dragleave', function(e) {
+            dropArea.addEventListener('dragleave', function (e) {
                 dropArea.classList.remove('dragover');
             });
-            dropArea.addEventListener('drop', function(e) {
+            dropArea.addEventListener('drop', function (e) {
                 e.preventDefault();
                 dropArea.classList.remove('dragover');
                 fileInput.files = e.dataTransfer.files;
@@ -1285,7 +1354,7 @@ mysqli_close($conn);
         const toggles = document.querySelectorAll('.report-dropdown-toggle');
 
         toggles.forEach(toggle => {
-            toggle.addEventListener('click', function(event) {
+            toggle.addEventListener('click', function (event) {
                 event.preventDefault();
                 const dropdown = this.closest('.report-dropdown');
                 dropdown.classList.toggle('show');
@@ -1328,7 +1397,7 @@ mysqli_close($conn);
     <?php if (isset($_SESSION['success_message'])): ?>
         showSuccessModal("<?php echo $_SESSION['success_message']; ?>");
         <?php unset($_SESSION['success_message']); // Clear the session message 
-        ?>
+            ?>
     <?php endif; ?>
 
     // Check for error message
@@ -1412,26 +1481,26 @@ mysqli_close($conn);
     }
 
     // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         updateStepper(1);
     });
 
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Show Confirm Logout Modal
-        document.getElementById('logoutLink').addEventListener('click', function(e) {
+        document.getElementById('logoutLink').addEventListener('click', function (e) {
             e.preventDefault();
             document.getElementById('logoutModal').style.display = 'flex';
             document.getElementById('profileDropdown').classList.remove('show'); // <-- Add this line
         });
 
         // Handle Confirm Logout
-        document.getElementById('confirmLogout').addEventListener('click', function() {
+        document.getElementById('confirmLogout').addEventListener('click', function () {
             window.location.href = 'logout.php';
         });
 
         // Handle Cancel Logout
-        document.getElementById('cancelLogout').addEventListener('click', function() {
+        document.getElementById('cancelLogout').addEventListener('click', function () {
             document.getElementById('logoutModal').style.display = 'none';
         });
     });

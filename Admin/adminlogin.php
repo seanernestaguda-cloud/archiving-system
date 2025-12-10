@@ -184,7 +184,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 // Auto-close modal after 2 seconds
                 setTimeout(function() {
                     document.getElementById('errorModal').style.display = 'none';
-                }, 500);
+                }, 2000);
 
                 // Optional: manual close handlers (if you add a close button)
                 document.getElementById('closeErrorModal')?.addEventListener('click', function() {

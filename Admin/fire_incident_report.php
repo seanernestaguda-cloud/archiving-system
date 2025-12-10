@@ -7,140 +7,18 @@ if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
+// Hash generator for report integrity
+function generateReportHash($report_id, $report_title, $fire_location, $incident_date, $establishment)
+{
+    $data = $report_id . '|' . $report_title . '|' . $fire_location . '|' . $incident_date . '|' . $establishment;
+    return hash('sha256', $data);
+}
+
 $sql_settings = "SELECT system_name FROM settings LIMIT 1";
 $result_settings = $conn->query($sql_settings);
 $system_name = 'BUREAU OF FIRE PROTECTION ARCHIVING SYSTEM';
 if ($result_settings && $row_settings = $result_settings->fetch_assoc()) {
     $system_name = $row_settings['system_name'];
-}
-
-use PhpOffice\PhpSpreadsheet\Shared\Date;
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file']) && $_FILES['file']['error'] === 0) {
-    $file = $_FILES['file'];
-
-    // Retrieve file information
-    $fileName = $file['name'];
-    $fileTmpName = $file['tmp_name'];
-    $fileSize = $file['size'];
-    $fileType = $file['type'];
-    $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-
-    $allowedExtensions = ['xls', 'xlsx', 'pdf'];
-
-    if (in_array($fileExt, $allowedExtensions)) {
-        require '../phpspreadsheet/vendor/autoload.php'; // Ensure PHPSpreadsheet is installed
-
-        try {
-            if (in_array($fileExt, ['xls', 'xlsx', 'pdf'])) {
-                // Handle Excel files
-
-                $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($fileTmpName);
-                $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true, true);
-
-                foreach ($sheetData as $index => $row) {
-                    if ($index === 1)
-                        continue; // Skip header row
-
-                    $report_id = $row['A'] ?? null; // Assuming column A contains Report ID
-                    $report_title = $row['B'] ?? null;
-                    $fire_location = $row['C'] ?? null;
-                    $street = $row['D'] ?? null;
-                    $purok = $row['E'] ?? null;
-                    $location_combined = trim("$street, $purok, $fire_location");
-                    $incident_date = $row['F'];
-
-                    if (is_numeric($incident_date)) {
-                        $incident_date = Date::excelToDateTimeObject($incident_date);
-                        $incident_date = $incident_date->format('Y-m-d H:i:s');
-                    }
-
-                    $establishment = $row['G'] ?? null;
-                    $victims = $row['H'] ?? null;
-                    $firefighters = $row['I'] ?? null;
-                    $property_damage = $row['J'] ?? null;
-                    $fire_types = $row['K'] ?? null;
-
-                    if (!empty($report_id) && preg_match('/^[a-zA-Z0-9_-]+$/', $report_id)) {
-                        // Check if the report already exists
-                        $checkQuery = "SELECT report_id FROM fire_incident_reports WHERE report_id = ?";
-                        $stmtCheck = $conn->prepare($checkQuery);
-                        $stmtCheck->bind_param('s', $report_id);
-                        $stmtCheck->execute();
-                        $resultCheck = $stmtCheck->get_result();
-
-                        if ($resultCheck->num_rows === 0) {
-                            // Insert new record
-                            $insertQuery = "INSERT INTO fire_incident_reports (
-                                report_id, report_title, fire_location, street, purok, municipality, incident_date, establishment, victims, firefighters, property_damage, fire_types, uploader, department
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                            $stmtInsert = $conn->prepare($insertQuery);
-                            $stmtInsert->bind_param(
-                                'ssssssssssssss', // Updated to include 13 placeholders
-                                $report_id,
-                                $report_title,
-                                $fire_location,
-                                $street,
-                                $purok,
-                                $incident_date,
-                                $establishment,
-                                $victims,
-                                $firefighters,
-                                $property_damage,
-                                $fire_types,
-                                $_SESSION['username'],
-                                $_SESSION['department'] // Ensure this is set correctly in the session
-                            );
-                            $stmtInsert->execute();
-                        } else {
-                            // Update existing record
-                            $updateQuery = "UPDATE fire_incident_reports SET 
-                                report_title = ?, fire_location = ?, street = ?, purok = ?, municipality = ?, incident_date = ?, 
-                                establishment = ?, victims = ?, firefighters = ?, property_damage = ?, fire_types = ?, uploader = ?, department = ?
-                                WHERE report_id = ?";
-                            $stmtUpdate = $conn->prepare($updateQuery);
-                            $stmtUpdate->bind_param(
-                                'ssssssssssssss',
-                                $report_title,
-                                $fire_location,
-                                $street,
-                                $purok,
-                                $incident_date,
-                                $establishment,
-                                $victims,
-                                $firefighters,
-                                $property_damage,
-                                $fire_types,
-                                $_SESSION['username'],
-                                $_SESSION['department'],
-                                $report_id
-                            );
-                            $stmtUpdate->execute();
-                        }
-                    } else {
-                        $_SESSION['message'] = "Skipped invalid record with Report ID: $report_id.";
-                    }
-                }
-
-                $_SESSION['message'] = "File uploaded and data imported successfully.";
-                $_SESSION['message_type'] = "success";
-            }
-        } catch (Exception $e) {
-            $_SESSION['message'] = "Error processing the file: " . $e->getMessage();
-            $_SESSION['message_type'] = "error";
-        }
-    } else {
-        $_SESSION['message'] = "Invalid file type. Please upload an Excel file.";
-        $_SESSION['message_type'] = "error";
-    }
-
-    header("Location: fire_incident_report.php");
-    exit;
-} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $_SESSION['message'] = "No file uploaded.";
-    $_SESSION['message_type'] = "error";
-    header("Location: fire_incident_report.php");
-    exit;
 }
 
 
@@ -708,7 +586,7 @@ mysqli_close($conn);
                                 $any_row_shown = false;
                                 foreach ($reports as $row):
                                     $any_row_shown = true;
-                                    ?>
+                                ?>
                                     <tr id="report-row<?php echo $row['report_id']; ?>">
                                         <td class="select-checkbox-cell" style="display:none;">
                                             <input type="checkbox" class="select-item"
@@ -795,25 +673,25 @@ mysqli_close($conn);
                             <div id="paginationContainer" class="pagination" style="margin: 20px 0; text-align: center;">
                                 <?php if ($page > 1): ?>
                                     <a href="?<?php
-                                    $params = $_GET;
-                                    $params['page'] = $page - 1;
-                                    echo http_build_query($params);
-                                    ?>" class="pagination-btn">&laquo; Prev</a>
+                                                $params = $_GET;
+                                                $params['page'] = $page - 1;
+                                                echo http_build_query($params);
+                                                ?>" class="pagination-btn">&laquo; Prev</a>
                                 <?php endif; ?>
                                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                     <a href="?<?php
-                                    $params = $_GET;
-                                    $params['page'] = $i;
-                                    echo http_build_query($params);
-                                    ?>" class="pagination-btn<?php if ($i == $page)
-                                        echo ' active'; ?>"><?php echo $i; ?></a>
+                                                $params = $_GET;
+                                                $params['page'] = $i;
+                                                echo http_build_query($params);
+                                                ?>" class="pagination-btn<?php if ($i == $page)
+                                                                                echo ' active'; ?>"><?php echo $i; ?></a>
                                 <?php endfor; ?>
                                 <?php if ($page < $total_pages): ?>
                                     <a href="?<?php
-                                    $params = $_GET;
-                                    $params['page'] = $page + 1;
-                                    echo http_build_query($params);
-                                    ?>" class="pagination-btn">Next &raquo;</a>
+                                                $params = $_GET;
+                                                $params['page'] = $page + 1;
+                                                echo http_build_query($params);
+                                                ?>" class="pagination-btn">Next &raquo;</a>
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>
@@ -870,7 +748,7 @@ mysqli_close($conn);
                 const toggles = document.querySelectorAll('.report-dropdown-toggle');
 
                 toggles.forEach(toggle => {
-                    toggle.addEventListener('click', function (event) {
+                    toggle.addEventListener('click', function(event) {
                         event.preventDefault();
                         const dropdown = this.closest('.report-dropdown');
                         dropdown.classList.toggle('show');
@@ -968,21 +846,21 @@ mysqli_close($conn);
 
             // Confirm delete handler for both single and multi delete
 
-            document.getElementById('confirmDeleteBtn').onclick = function () {
+            document.getElementById('confirmDeleteBtn').onclick = function() {
                 if (singleDeleteId) {
                     // Single delete
                     fetch('delete_report.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: 'report_id=' + encodeURIComponent(singleDeleteId)
-                    })
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: 'report_id=' + encodeURIComponent(singleDeleteId)
+                        })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
                                 openSuccessModal();
-                                setTimeout(function () {
+                                setTimeout(function() {
                                     window.location.reload();
                                 }, 1200);
                             } else {
@@ -994,19 +872,19 @@ mysqli_close($conn);
                 } else if (selectedToDelete.length > 0) {
                     // Multi delete
                     fetch('delete_selected_reports.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            report_ids: selectedToDelete
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                report_ids: selectedToDelete
+                            })
                         })
-                    })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
                                 openSuccessModal();
-                                setTimeout(function () {
+                                setTimeout(function() {
                                     window.location.reload();
                                 }, 1200);
                             } else {
@@ -1055,14 +933,14 @@ mysqli_close($conn);
                 });
             }
 
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', function() {
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.get('start_month') || urlParams.get('end_month')) {
                     document.getElementById('monthFilterContainer').style.display = 'block';
                 }
             });
 
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', function() {
                 const searchInput = document.querySelector('.search-input');
                 const reportsTableBody = document.getElementById('reportsTableBody');
                 const paginationContainer = document.getElementById('paginationContainer');
@@ -1070,14 +948,14 @@ mysqli_close($conn);
 
                 if (searchInput && reportsTableBody) {
                     let searchTimeout;
-                    searchInput.addEventListener('input', function () {
+                    searchInput.addEventListener('input', function() {
                         clearTimeout(searchTimeout);
-                        searchTimeout = setTimeout(function () {
+                        searchTimeout = setTimeout(function() {
                             const searchValue = searchInput.value;
                             if (searchValue.trim() === '') {
                                 // If search is cleared, reload the page to show all data
                                 if (paginationContainer) paginationContainer.style.display = '';
-                                window.location.href = window.location.pathname + window.location.search.replace(/([&?])search=[^&]*(&|$)/, function (match, p1, p2) {
+                                window.location.href = window.location.pathname + window.location.search.replace(/([&?])search=[^&]*(&|$)/, function(match, p1, p2) {
                                     // Remove search param from query string
                                     if (p2) return p1;
                                     return '';
@@ -1090,7 +968,7 @@ mysqli_close($conn);
                                 if (paginationContainer) paginationContainer.style.display = 'none';
                                 const xhr = new XMLHttpRequest();
                                 xhr.open('GET', 'fire_incident_report_ajax.php?search=' + encodeURIComponent(searchValue) + '&count=1', true);
-                                xhr.onload = function () {
+                                xhr.onload = function() {
                                     if (xhr.status === 200) {
                                         let response;
                                         try {
@@ -1116,7 +994,7 @@ mysqli_close($conn);
                         }, 300);
                     });
                     // Prevent Enter key from submitting the form
-                    searchInput.addEventListener('keydown', function (e) {
+                    searchInput.addEventListener('keydown', function(e) {
                         if (e.key === 'Enter') {
                             e.preventDefault();
                         }
@@ -1124,26 +1002,26 @@ mysqli_close($conn);
                 }
             });
 
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', function() {
                 // Show Confirm Logout Modal
-                document.getElementById('logoutLink').addEventListener('click', function (e) {
+                document.getElementById('logoutLink').addEventListener('click', function(e) {
                     e.preventDefault();
                     document.getElementById('logoutModal').style.display = 'flex';
                     document.getElementById('profileDropdown').classList.remove('show'); // <-- Add this line
                 });
 
                 // Handle Confirm Logout
-                document.getElementById('confirmLogout').addEventListener('click', function () {
+                document.getElementById('confirmLogout').addEventListener('click', function() {
                     window.location.href = 'logout.php';
                 });
 
                 // Handle Cancel Logout
-                document.getElementById('cancelLogout').addEventListener('click', function () {
+                document.getElementById('cancelLogout').addEventListener('click', function() {
                     document.getElementById('logoutModal').style.display = 'none';
                 });
             });
 
-            window.onclick = function (event) {
+            window.onclick = function(event) {
                 // ...existing code...
                 const logoutModal = document.getElementById('logoutModal');
                 if (event.target === logoutModal) {
