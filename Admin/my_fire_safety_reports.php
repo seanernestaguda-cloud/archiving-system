@@ -42,26 +42,40 @@ $where_clauses[] = "uploader = ?";
 $params[] = $username;
 $param_types .= 's';
 
-if (!empty($_GET['start_month'])) {
+// Monthly filter: filter inspection_date between start and end of selected months
+if (!empty($_GET['start_month']) && !empty($_GET['end_month'])) {
+    $start = $_GET['start_month'] . '-01';
+    $end_month = $_GET['end_month'];
+    $last_day = date('t', strtotime($end_month . '-01'));
+    $end = $end_month . '-' . $last_day;
+    $where_clauses[] = "inspection_date BETWEEN ? AND ?";
+    $params[] = $start;
+    $params[] = $end;
+    $param_types .= 'ss';
+} elseif (!empty($_GET['start_month'])) {
     $start = $_GET['start_month'] . '-01';
     $where_clauses[] = "inspection_date >= ?";
     $params[] = $start;
     $param_types .= 's';
-}
-if (!empty($_GET['end_month'])) {
-    $end = date('Y-m-t', strtotime($_GET['end_month'] . '-01'));
+} elseif (!empty($_GET['end_month'])) {
+    $end_month = $_GET['end_month'];
+    $last_day = date('t', strtotime($end_month . '-01'));
+    $end = $end_month . '-' . $last_day;
     $where_clauses[] = "inspection_date <= ?";
     $params[] = $end;
     $param_types .= 's';
 }
 if (!empty($_GET['search'])) {
     $search = '%' . $_GET['search'] . '%';
-    $where_clauses[] = "(id LIKE ? OR permit_name LIKE ? OR inspection_establishment LIKE ? OR owner LIKE ?)";
+    $where_clauses[] = "(id LIKE ? OR permit_name LIKE ? OR inspection_establishment LIKE ? OR owner LIKE ? OR inspection_address LIKE ? OR establishment_type LIKE ? OR inspection_purpose LIKE ?)";
     $params[] = $search;
     $params[] = $search;
     $params[] = $search;
     $params[] = $search;
-    $param_types .= 'ssss';
+    $params[] = $search;
+    $params[] = $search;
+    $params[] = $search;
+    $param_types .= 'sssssss';
 }
 $where_sql = $where_clauses ? 'WHERE ' . implode(' AND ', $where_clauses) : '';
 
@@ -385,13 +399,44 @@ $stmt->close();
                                 <a href="?sort_by=permit_name" class="select-multi-btn"
                                     style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Title</a>
                                 <a href="?sort_by=inspection_date" class="select-multi-btn"
-                                    style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Time
-                                    & Date</a>
+                                    style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Date of Inspection</a>
                                 <a href="?sort_by=inspection_establishment" class="select-multi-btn"
                                     style="width:100%; text-align:left; border-radius:0; text-decoration: none;">Establishment</a>
                             </div>
                         </div>
-
+                        <button id="toggleMonthFilterBtn" class="select-multi-btn" type="button"
+                            onclick="toggleMonthFilter()">
+                            <i style="color:#0096FF;" class="fa-solid fa-calendar"></i>
+                        </button>
+                        <?php
+                        $monthFilterActive = !empty($_GET['start_month']) || !empty($_GET['end_month']);
+                        ?>
+                        <div id="monthFilterContainer"
+                            style="display:<?php echo $monthFilterActive ? 'block' : 'none'; ?>;">
+                            <form action="my_fire_safety_reports.php" method="GET"
+                                style="display: flex; gap: 8px; align-items: center;">
+                                <label>
+                                    <input type="month" name="start_month"
+                                        value="<?php echo isset($_GET['start_month']) ? htmlspecialchars($_GET['start_month']) : ''; ?>">
+                                </label>
+                                <span>to</span>
+                                <label>
+                                    <input type="month" name="end_month"
+                                        value="<?php echo isset($_GET['end_month']) ? htmlspecialchars($_GET['end_month']) : ''; ?>">
+                                </label>
+                                <?php
+                                // Preserve other GET params (search, sort_by, etc.)
+                                foreach ($_GET as $key => $val) {
+                                    if (!in_array($key, ['start_month', 'end_month'])) {
+                                        echo '<input type="hidden" name="' . htmlspecialchars($key) . '" value="' . htmlspecialchars($val) . '">';
+                                    }
+                                }
+                                ?>
+                                <button type="submit" class="filter-multi-btn">Filter</button>
+                                <a href="my_fire_safety_reports.php" class="clear-filter-multi-btn">Clear
+                                    Filter</a>
+                            </form>
+                        </div>
                         <form action="export_my_permits.php" method="GET" style="display:inline;">
                             <input type="hidden" name="start_month"
                                 value="<?php echo isset($_GET['start_month']) ? htmlspecialchars($_GET['start_month']) : ''; ?>">

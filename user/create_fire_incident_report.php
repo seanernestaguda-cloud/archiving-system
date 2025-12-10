@@ -838,7 +838,7 @@ mysqli_close($conn);
 
                                     <div class="form-group" style="width: 45%; display: inline-block;">
                                         <label for="firefighters">Firefighters<br>
-                                            <textarea id="victims" name="firefighters" rows="10" cols="30" placeholder="Enter each firefighter on a new line" onfocus="addFirstNumber()" oninput="autoNumber()" style="border-bottom: 1px solid #444;"></textarea><br><br>
+                                            <textarea id="firefighters" name="firefighters" rows="10" cols="30" placeholder="Enter each firefighter on a new line" onfocus="addFirstNumber()" oninput="autoNumber()" style="border-bottom: 1px solid #444;"></textarea><br><br>
                                     </div>
                     </fieldset>
                     <div class="form-actions">

@@ -1,69 +1,77 @@
 <?php
-session_start();
 include('connection.php');
-$username = $_SESSION['username'];
+include('auth_check.php');
 
 if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-$search = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
+$search = isset($_GET['search']) ? $_GET['search'] : '';
+$where_clauses = ["deleted_at IS NULL"];
+$where_clauses[] = "uploader = '" . mysqli_real_escape_string($conn, $username) . "'";
 
-$where_clauses[] = "deleted_at IS NULL";
-$where_clauses[] = "uploader = '" . mysqli_real_escape_string($conn, $_SESSION['username']) . "'";
-$query_search = $search;
-$where_sql = $where_clauses ? 'WHERE ' . implode(' AND ', $where_clauses) : '';
+$params = [];
+$param_types = '';
 
+// ...existing code for preparing and executing the query...
 
-// If searching, ignore pagination and get all records
-if ($search !== '') {
-    $query = "SELECT * FROM fire_safety_inspection_certificate $where_sql ORDER BY id DESC";
-    $result = mysqli_query($conn, $query);
-    $permits = mysqli_fetch_all($result, MYSQLI_ASSOC);
-} else {
-    $query = "SELECT * FROM fire_safety_inspection_certificate $where_sql ORDER BY id DESC LIMIT 50";
-    $result = mysqli_query($conn, $query);
-    $permits = mysqli_fetch_all($result, MYSQLI_ASSOC);
+$stmt = $conn->prepare("SELECT 
+    report_id, 
+    report_title, 
+    CONCAT(street, ', ', purok, ', ', fire_location, ', ', municipality) AS fire_location_combined, 
+    incident_date, 
+    establishment, 
+    victims, 
+    firefighters,
+    property_damage, 
+    fire_types, 
+    uploader, 
+    department,
+    created_at,
+    caller_name,
+    responding_team,
+    arrival_time,
+    fireout_time,
+    alarm_status,
+    occupancy_type, documentation_photos, narrative_report, progress_report, final_investigation_report
+FROM fire_incident_reports 
+" . ($where_clauses ? 'WHERE ' . implode(' AND ', $where_clauses) : '') . "
+ORDER BY incident_date DESC
+LIMIT 50");
+if ($param_types) {
+    $stmt->bind_param($param_types, ...$params);
 }
+$stmt->execute();
+$result = $stmt->get_result();
+$reports = $result->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+mysqli_close($conn);
 
+// Track if any row is shown
 
 $rows_html = '';
 $filtered_count = 0;
-foreach ($permits as $row) {
+foreach ($reports as $row) {
+    $victims_count = empty($row['victims']) ? 0 : substr_count($row['victims'], ',') + 1;
+    $firefighters_count = empty($row['firefighters']) ? 0 : substr_count($row['firefighters'], ',') + 1;
+    $casualties = $victims_count + $firefighters_count;
     $required_fields = [
-        $row['permit_name'],
-        $row['inspection_establishment'],
-        $row['owner'],
-        $row['inspection_address'],
-        $row['inspection_date'],
-        $row['establishment_type'],
-        $row['inspection_purpose'],
-        $row['fire_alarms'],
-        $row['fire_extinguishers'],
-        $row['emergency_exits'],
-        $row['sprinkler_systems'],
-        $row['fire_drills'],
-        $row['exit_signs'],
-        $row['electrical_wiring'],
-        $row['emergency_evacuations'],
-        $row['inspected_by'],
-        $row['contact_person'],
-        $row['contact_number'],
-        $row['number_of_occupants'],
-        $row['nature_of_business'],
-        $row['number_of_floors'],
-        $row['floor_area'],
-        $row['classification_of_hazards'],
-        $row['building_construction'],
-        $row['possible_problems'],
-        $row['hazardous_materials'],
-        $row['application_form'],
-        $row['proof_of_ownership'],
-        $row['building_plans'],
-        $row['fire_safety_inspection_certificate'],
-        $row['fire_safety_inspection_checklist'],
-        $row['occupancy_permit'],
-        $row['business_permit'],
+        $row['report_title'],
+        $row['caller_name'],
+        $row['responding_team'],
+        $row['fire_location_combined'],
+        $row['incident_date'],
+        $row['arrival_time'],
+        $row['fireout_time'],
+        $row['establishment'],
+        $row['alarm_status'],
+        $row['occupancy_type'],
+        $row['property_damage'],
+        $row['fire_types'],
+        $row['documentation_photos'],
+        $row['narrative_report'],
+        $row['progress_report'],
+        $row['final_investigation_report']
     ];
     $is_complete = true;
     foreach ($required_fields as $field) {
@@ -73,23 +81,27 @@ foreach ($permits as $row) {
         }
     }
     $status = $is_complete ? 'Complete' : 'In Progress';
-
-    $search_fields = array(
-        $row['id'],
-        $row['permit_name'],
-        $row['inspection_establishment'],
-        $row['establishment_type'],
-        $row['owner'],
-        $row['inspection_purpose'],
-        $row['inspection_address'],
-        $row['inspection_date'],
-        $status
-    );
+    $fire_types_display = empty($row['fire_types']) ? 'Under Investigation' : $row['fire_types'];
 
     $show_row = true;
-    if ($query_search !== '') {
-        $search_lower = strtolower($query_search);
+    if (!empty($search)) {
+        $search_lower = strtolower($search);
         $match = false;
+        $search_fields = array(
+            $row['report_id'],
+            $row['report_title'],
+            $row['fire_location_combined'],
+            $row['incident_date'],
+            $row['establishment'],
+            $row['victims'],
+            $row['property_damage'],
+            $row['fire_types'],
+            // $row['uploader'],
+            // $row['department'],
+            $row['created_at'],
+            $status,
+            $fire_types_display
+        );
         foreach ($search_fields as $field) {
             if (strpos(strtolower((string) $field), $search_lower) !== false) {
                 $match = true;
@@ -102,33 +114,32 @@ foreach ($permits as $row) {
     }
     if ($show_row) {
         $filtered_count++;
-        $rows_html .= '<tr id="permit-row' . htmlspecialchars($row['id']) . '">';
-        $rows_html .= '<td class="select-checkbox-cell" style="display:none;"><input type="checkbox" class="select-item" value="' . htmlspecialchars($row['id']) . '"></td>';
-        $rows_html .= '<td>' . htmlspecialchars($row['id']) . '</td>';
-        $rows_html .= '<td>' . htmlspecialchars($row['permit_name']) . '</td>';
-        $rows_html .= '<td>' . htmlspecialchars($row['inspection_establishment']) . '</td>';
-        $rows_html .= '<td>' . htmlspecialchars($row['establishment_type']) . '</td>';
-        $rows_html .= '<td>' . htmlspecialchars($row['owner']) . '</td>';
-        $rows_html .= '<td>' . htmlspecialchars($row['inspection_purpose']) . '</td>';
-        $rows_html .= '<td>' . htmlspecialchars($row['inspection_address']) . '</td>';
-        $rows_html .= '<td>' . htmlspecialchars($row['inspection_date']) . '</td>';
+        $rows_html .= '<tr id="report-row' . htmlspecialchars($row['report_id']) . '">';
+        $rows_html .= '<td class="select-checkbox-cell" style="display:none;"><input type="checkbox" class="select-item" value="' . htmlspecialchars($row['report_id']) . '"></td>';
+        $rows_html .= '<td>' . htmlspecialchars($row['report_id']) . '</td>';
+        $rows_html .= '<td>' . htmlspecialchars($row['report_title']) . '</td>';
+        $rows_html .= '<td>' . htmlspecialchars($row['fire_location_combined']) . '</td>';
+        $rows_html .= '<td>' . htmlspecialchars($row['incident_date']) . '</td>';
+        $rows_html .= '<td>' . htmlspecialchars($row['establishment']) . '</td>';
+        $rows_html .= '<td>' . $casualties . '</td>';
+        $rows_html .= '<td>' . htmlspecialchars("₱" . $row['property_damage']) . '</td>';
+        $rows_html .= '<td>' . htmlspecialchars($fire_types_display) . '</td>';
         $rows_html .= '<td>' . htmlspecialchars($row['created_at']) . '</td>';
         $rows_html .= '<td>' . ($status === 'Complete' ? '<span style="color:green;">Complete</span>' : '<span style="color:orange;">In Progress</span>') . '</td>';
         $rows_html .= '<td class="action-button-container">';
-        $rows_html .= '<button class="view-btn" onclick="window.location.href=\'view_permit.php?id=' . htmlspecialchars($row['id']) . '\'">';
+        $rows_html .= '<button class="view-btn" onclick="window.location.href=\'view_report.php?report_id=' . htmlspecialchars($row['report_id']) . '\'">';
         $rows_html .= '<i class="fa-solid fa-eye"></i>';
         $rows_html .= '</button>';
-        $rows_html .= '<button class="delete-btn" onclick="deletePermit(' . htmlspecialchars(json_encode($row['id'])) . ')">';
+        $rows_html .= '<button class="delete-btn" onclick="deleteReport(' . htmlspecialchars(json_encode($row['report_id'])) . ')">';
         $rows_html .= '<i class="fa-solid fa-trash"></i>';
         $rows_html .= '</button>';
-        $rows_html .= '<button class="download-btn" onclick="window.location.href=\'generate_permit.php?id=' . htmlspecialchars($row['id']) . '\'">';
+        $rows_html .= '<button class="download-btn" onclick="window.location.href=\'generate_pdf.php?report_id=' . htmlspecialchars($row['report_id']) . '\'">';
         $rows_html .= '<i class="fa-solid fa-download"></i>';
         $rows_html .= '</button>';
         $rows_html .= '</td>';
         $rows_html .= '</tr>';
     }
 }
-mysqli_close($conn);
 
 if (isset($_GET['count']) && $_GET['count'] == '1') {
     header('Content-Type: application/json');
@@ -141,10 +152,4 @@ if (isset($_GET['count']) && $_GET['count'] == '1') {
         'count' => $filtered_count
     ]);
     exit;
-} else {
-    if ($filtered_count === 0) {
-        echo '<tr><td colspan="12" style="text-align:center; color:#888;">No reports found.</td></tr>';
-    } else {
-        echo $rows_html;
-    }
 }

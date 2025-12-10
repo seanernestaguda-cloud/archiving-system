@@ -3,7 +3,7 @@ include('connection.php');
 include('auth_check.php');
 
 // if (!isset($_SESSION['username'])) {
-//     header('Location: adminlogin.php');
+//     header('Location: userlogin.php');
 //     exit();
 // }
 
@@ -42,26 +42,40 @@ $where_clauses[] = "uploader = ?";
 $params[] = $username;
 $param_types .= 's';
 
-if (!empty($_GET['start_month'])) {
+// Monthly filter: filter inspection_date between start and end of selected months
+if (!empty($_GET['start_month']) && !empty($_GET['end_month'])) {
+    $start = $_GET['start_month'] . '-01';
+    $end_month = $_GET['end_month'];
+    $last_day = date('t', strtotime($end_month . '-01'));
+    $end = $end_month . '-' . $last_day;
+    $where_clauses[] = "inspection_date BETWEEN ? AND ?";
+    $params[] = $start;
+    $params[] = $end;
+    $param_types .= 'ss';
+} elseif (!empty($_GET['start_month'])) {
     $start = $_GET['start_month'] . '-01';
     $where_clauses[] = "inspection_date >= ?";
     $params[] = $start;
     $param_types .= 's';
-}
-if (!empty($_GET['end_month'])) {
-    $end = date('Y-m-t', strtotime($_GET['end_month'] . '-01'));
+} elseif (!empty($_GET['end_month'])) {
+    $end_month = $_GET['end_month'];
+    $last_day = date('t', strtotime($end_month . '-01'));
+    $end = $end_month . '-' . $last_day;
     $where_clauses[] = "inspection_date <= ?";
     $params[] = $end;
     $param_types .= 's';
 }
 if (!empty($_GET['search'])) {
     $search = '%' . $_GET['search'] . '%';
-    $where_clauses[] = "(id LIKE ? OR permit_name LIKE ? OR inspection_establishment LIKE ? OR owner LIKE ?)";
+    $where_clauses[] = "(id LIKE ? OR permit_name LIKE ? OR inspection_establishment LIKE ? OR owner LIKE ? OR inspection_address LIKE ? OR establishment_type LIKE ? OR inspection_purpose LIKE ?)";
     $params[] = $search;
     $params[] = $search;
     $params[] = $search;
     $params[] = $search;
-    $param_types .= 'ssss';
+    $params[] = $search;
+    $params[] = $search;
+    $params[] = $search;
+    $param_types .= 'sssssss';
 }
 $where_sql = $where_clauses ? 'WHERE ' . implode(' AND ', $where_clauses) : '';
 
@@ -286,8 +300,10 @@ $stmt->close();
                 <li class="archive-text">
                     <p>Archives</p>
                 </li>
-                <!-- <li><a href="fire_types.php"><i class="fa-solid fa-fire-flame-curved"></i><span> Causes of Fire </span></a></li>
-                <li><a href="barangay_list.php"><i class="fa-solid fa-map-location-dot"></i><span> Barangay List </span></a></li> -->
+                <!-- <li><a href="fire_types.php"><i class="fa-solid fa-fire-flame-curved"></i><span> Causes of Fire
+                        </span></a></li>
+                <li><a href="barangay_list.php"><i class="fa-solid fa-map-location-dot"></i><span> Barangay List
+                        </span></a></li> -->
                 <li><a href="myarchives.php"><i class="fa-solid fa-box-archive"></i><span> My Archives</span></a></li>
                 <li><a href="archives.php"><i class="fa-solid fa-fire"></i><span> Archives </span></a></li>
 
@@ -306,9 +322,10 @@ $stmt->close();
                                 Year Comparison </a></li>
                     </ul>
                 </li>
-
-                <!-- <li class="archive-text"><span>Maintenance</span></li>
-                <li><a href="activity_logs.php"><i class="fa-solid fa-file-invoice"></i><span> Activity Logs </span></a></li>
+<!-- 
+                <li class="archive-text"><span>Maintenance</span></li>
+                <li><a href="activity_logs.php"><i class="fa-solid fa-file-invoice"></i><span> Activity Logs </span></a>
+                </li>
                 <li><a href="departments.php"><i class="fas fa-users"></i><span> Department List </span></a></li>
                 <li><a href="manageuser.php"><i class="fas fa-users"></i><span> Manage Users </span></a></li>
                 <li><a href="setting.php"><i class="fa-solid fa-gear"></i> <span>Settings</span></a></li> -->
@@ -341,7 +358,7 @@ $stmt->close();
 
             <section class="archive-section">
                 <h3><?php echo htmlspecialchars($_SESSION['username']); ?>'s Fire Safety Inspection Reports</h3>
-                <p> List of Fire Safety Inspection Reports </p>
+                <p>List of Fire Safety Inspection Reports</p>
                 <br>
                 <p id="totalPermitsCount" style="font-weight:bold; color:#003D73; margin-bottom:10px;">Total Reports:
                     <?php echo number_format($total_permits); ?>
@@ -382,13 +399,44 @@ $stmt->close();
                                 <a href="?sort_by=permit_name" class="select-multi-btn"
                                     style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Title</a>
                                 <a href="?sort_by=inspection_date" class="select-multi-btn"
-                                    style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Time
-                                    & Date</a>
+                                    style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Date of Inspection</a>
                                 <a href="?sort_by=inspection_establishment" class="select-multi-btn"
                                     style="width:100%; text-align:left; border-radius:0; text-decoration: none;">Establishment</a>
                             </div>
                         </div>
-
+                        <button id="toggleMonthFilterBtn" class="select-multi-btn" type="button"
+                            onclick="toggleMonthFilter()">
+                            <i style="color:#0096FF;" class="fa-solid fa-calendar"></i>
+                        </button>
+                        <?php
+                        $monthFilterActive = !empty($_GET['start_month']) || !empty($_GET['end_month']);
+                        ?>
+                        <div id="monthFilterContainer"
+                            style="display:<?php echo $monthFilterActive ? 'block' : 'none'; ?>;">
+                            <form action="my_fire_safety_reports.php" method="GET"
+                                style="display: flex; gap: 8px; align-items: center;">
+                                <label>
+                                    <input type="month" name="start_month"
+                                        value="<?php echo isset($_GET['start_month']) ? htmlspecialchars($_GET['start_month']) : ''; ?>">
+                                </label>
+                                <span>to</span>
+                                <label>
+                                    <input type="month" name="end_month"
+                                        value="<?php echo isset($_GET['end_month']) ? htmlspecialchars($_GET['end_month']) : ''; ?>">
+                                </label>
+                                <?php
+                                // Preserve other GET params (search, sort_by, etc.)
+                                foreach ($_GET as $key => $val) {
+                                    if (!in_array($key, ['start_month', 'end_month'])) {
+                                        echo '<input type="hidden" name="' . htmlspecialchars($key) . '" value="' . htmlspecialchars($val) . '">';
+                                    }
+                                }
+                                ?>
+                                <button type="submit" class="filter-multi-btn">Filter</button>
+                                <a href="my_fire_safety_reports.php" class="clear-filter-multi-btn">Clear
+                                    Filter</a>
+                            </form>
+                        </div>
                         <form action="export_my_permits.php" method="GET" style="display:inline;">
                             <input type="hidden" name="start_month"
                                 value="<?php echo isset($_GET['start_month']) ? htmlspecialchars($_GET['start_month']) : ''; ?>">
@@ -401,11 +449,10 @@ $stmt->close();
                                 <label for="">.csv</label>
                             </button>
                         </form>
-                        <button type="button" class="select-multi-btn" id="printTableBtn" style="margin-left: 5px;">
+                        <button type="button" class="select-multi-btn" id="printTableBtn" style="margin-left:4px;">
                             <i class="fa-solid fa-print" style="color: #003D73;"></i>
                             <label for="">Print</label>
                         </button>
-                        </form>
                     </div>
                     <!-- entries-right (search) -->
                     <div class="entries-right">
@@ -428,6 +475,7 @@ $stmt->close();
                         <th>Purpose</th>
                         <th>Address</th>
                         <th>Date of Inspection</th>
+                        <th>Date Created</th>
                         <!-- <th>Uploader</th>
                 <th>Department</th> -->
                         <th>Status</th>
@@ -455,6 +503,7 @@ $stmt->close();
                                     <td><?php echo htmlspecialchars($row['inspection_purpose']); ?></td>
                                     <td><?php echo htmlspecialchars($row['inspection_address']); ?></td>
                                     <td><?php echo htmlspecialchars(date("Y-m-d", strtotime($row['inspection_date']))) ?></td>
+                                    <td><?php echo htmlspecialchars($row['created_at']); ?></td>
                                     <!-- <td><?php echo htmlspecialchars($row['uploader']); ?></td>
             <td><?php echo htmlspecialchars($row['department']); ?></td> -->
                                     <td>
@@ -531,10 +580,8 @@ $stmt->close();
 
                 <?php
                 $total_pages = ceil($total_permits / $per_page);
-                // Hide pagination if searching
-                $is_searching = !empty($_GET['search']);
-                if ($total_pages > 1 && !$is_searching): ?>
-                    <div class="pagination" style="margin: 20px 0; text-align: center;">
+                if ($total_pages > 1): ?>
+                    <div id="paginationContainer" class="pagination" style="margin: 20px 0; text-align: center;">
                         <?php if ($page > 1): ?>
                             <a href="?<?php
                             $params = $_GET;
@@ -598,54 +645,54 @@ $stmt->close();
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Print Table Button functionality
+        // Print button functionality (table only, no buttons and no action column)
+        document.addEventListener('DOMContentLoaded', function () {
             const printBtn = document.getElementById('printTableBtn');
             if (printBtn) {
                 printBtn.addEventListener('click', function () {
                     const table = document.querySelector('.archive-table');
-                    if (!table) return;
-                    // Clone table to avoid modifying the original
-                    const tableClone = table.cloneNode(true);
-                    // Find the Action column index from the header row
-                    let actionColIndex = -1;
-                    // Find the header row (first tr with th children)
-                    let theadRow = null;
-                    const allRows = tableClone.querySelectorAll('tr');
-                    for (let row of allRows) {
-                        if (row.querySelector('th')) {
-                            theadRow = row;
-                            break;
+                    const totalReports = document.getElementById('totalPermitsCount');
+                    if (table) {
+                        // Clone the table so we can modify it for printing
+                        const tableClone = table.cloneNode(true);
+                        // Find the index of the Action column
+                        const headerRow = tableClone.querySelector('tr');
+                        let actionColIndex = -1;
+                        if (headerRow) {
+                            Array.from(headerRow.children).forEach((th, idx) => {
+                                if (th.textContent.trim().toLowerCase() === 'action') {
+                                    actionColIndex = idx;
+                                }
+                            });
                         }
-                    }
-                    if (theadRow) {
-                        Array.from(theadRow.children).forEach((th, idx) => {
-                            if (th.textContent.trim().toLowerCase() === 'action') {
-                                actionColIndex = idx;
+                        // Remove the Action header cell
+                        if (actionColIndex !== -1 && headerRow) {
+                            headerRow.removeChild(headerRow.children[actionColIndex]);
+                        }
+                        // Remove the Action cell from each body row
+                        tableClone.querySelectorAll('tbody tr').forEach(row => {
+                            if (actionColIndex !== -1 && row.children.length > actionColIndex) {
+                                row.removeChild(row.children[actionColIndex]);
                             }
                         });
-                        if (actionColIndex !== -1) {
-                            theadRow.removeChild(theadRow.children[actionColIndex]);
+                        const printWindow = window.open('', '', 'height=700,width=1000');
+                        printWindow.document.write('<html><head><title>Print My Fire Safety Reports</title>');
+                        printWindow.document.write('<link rel="stylesheet" href="reportstyle.css">');
+                        printWindow.document.write('<link rel="stylesheet" href="modal.css">');
+                        printWindow.document.write('<link rel="stylesheet" href="../css/all.min.css">');
+                        printWindow.document.write('<link rel="stylesheet" href="../css/fontawesome.min.css">');
+                        printWindow.document.write('</head><body >');
+                        if (totalReports) {
+                            printWindow.document.write('<div style="font-weight:bold; color:#003D73; margin-bottom:10px;">' + totalReports.textContent + '</div>');
                         }
+                        printWindow.document.write(tableClone.outerHTML);
+                        printWindow.document.write('</body></html>');
+                        printWindow.document.close();
+                        printWindow.focus();
+                        setTimeout(function () {
+                            printWindow.print();
+                        }, 500);
                     }
-                    // Remove Action column from all rows (header and body)
-                    tableClone.querySelectorAll('tr').forEach(row => {
-                        // Only remove if the row has enough cells
-                        if (actionColIndex !== -1 && row.children.length > actionColIndex) {
-                            row.removeChild(row.children[actionColIndex]);
-                        }
-                    });
-                    const newWin = window.open('', '', 'width=900,height=700');
-                    newWin.document.write('<html><head><title>Print Table</title>');
-                    newWin.document.write('<link rel="stylesheet" href="reportstyle.css">');
-                    newWin.document.write('</head><body >');
-                    newWin.document.write(tableClone.outerHTML);
-                    newWin.document.write('</body></html>');
-                    newWin.document.close();
-                    newWin.focus();
-                    setTimeout(() => {
-                        newWin.print();
-                    }, 500);
                 });
             }
         });
@@ -721,6 +768,30 @@ $stmt->close();
         }
 
         document.getElementById('confirmDeleteBtn').onclick = function () {
+            // Helper to reload table body via AJAX
+            function reloadTableBody() {
+                // Get current search value
+                const searchInput = document.querySelector('.search-input');
+                const query = searchInput ? searchInput.value : '';
+                // Build AJAX URL with current search
+                let url = 'my_fire_safety_reports_ajax.php';
+                if (query) {
+                    url += `?search=${encodeURIComponent(query)}`;
+                }
+                fetch(url)
+                    .then(response => response.text())
+                    .then(html => {
+                        const reportsTableBody = document.getElementById('permitsTableBody');
+                        if (reportsTableBody) {
+                            if (html.trim() === '') {
+                                reportsTableBody.innerHTML = '<tr><td colspan="12" style="text-align:center;">No reports found.</td></tr>';
+                            } else {
+                                reportsTableBody.innerHTML = html;
+                            }
+                        }
+                    });
+            }
+
             if (singleDeleteId) {
                 fetch('delete_selected_permits.php', {
                     method: 'POST',
@@ -734,8 +805,8 @@ $stmt->close();
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
+                            reloadTableBody();
                             openSuccessModal();
-                            refreshPermitsTable();
                         } else {
                             alert('Error deleting permit.');
                         }
@@ -755,8 +826,8 @@ $stmt->close();
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
+                            reloadTableBody();
                             openSuccessModal();
-                            refreshPermitsTable();
                         } else {
                             alert('Error deleting permits.');
                         }
@@ -798,32 +869,6 @@ $stmt->close();
             document.getElementById('successModal').style.display = 'none';
         }
 
-        // Refresh table after delete
-        function refreshPermitsTable() {
-            const searchInput = document.querySelector('.search-input');
-            const reportsTableBody = document.getElementById('permitsTableBody');
-            let query = '';
-            if (searchInput) {
-                query = searchInput.value;
-            }
-            // Build AJAX URL with current search and filter params
-            const urlParams = new URLSearchParams(window.location.search);
-            if (query) {
-                urlParams.set('search', query);
-            }
-            fetch(`my_fire_safety_reports_ajax.php?${urlParams.toString()}`)
-                .then(response => response.text())
-                .then(html => {
-                    if (reportsTableBody) {
-                        if (html.trim() === '') {
-                            reportsTableBody.innerHTML = '<tr><td colspan="12" style="text-align:center;">No reports found.</td></tr>';
-                        } else {
-                            reportsTableBody.innerHTML = html;
-                        }
-                    }
-                });
-        }
-
         function toggleMonthFilter() {
             const container = document.getElementById('monthFilterContainer');
             container.style.display = (container.style.display === 'none' || container.style.display === '') ? 'block' : 'none';
@@ -848,18 +893,42 @@ $stmt->close();
         });
 
         document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('start_month') || urlParams.get('end_month')) {
+                document.getElementById('monthFilterContainer').style.display = 'block';
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function () {
             const searchInput = document.querySelector('.search-input');
-            const permitsTableBody = document.getElementById('permitsTableBody');
-            if (searchInput && permitsTableBody) {
+            const reportsTableBody = document.getElementById('permitsTableBody');
+            const totalPermitsCount = document.getElementById('totalPermitsCount');
+            const paginationContainer = document.getElementById('paginationContainer');
+
+            if (searchInput && reportsTableBody && totalPermitsCount) {
                 let searchTimeout;
                 searchInput.addEventListener('input', function () {
                     clearTimeout(searchTimeout);
                     searchTimeout = setTimeout(function () {
                         const query = searchInput.value;
-                        if (query === '') {
-                            window.location.href = window.location.pathname + window.location.search.replace(/([?&])search=[^&]*/g, '');
+                        if (query.trim() === '') {
+                            // If search is cleared, reload the page to restore pagination
+                            window.location.href = window.location.pathname + window.location.search.replace(/([?&])search=[^&]*/g, '').replace(/^\?$/, '');
+                            if (paginationContainer) {
+                                paginationContainer.style.display = '';
+                            }
+                        } else {
+                            // Always reset to page 1 when searching
+                            fetch(`my_fire_safety_reports_ajax.php?search=${encodeURIComponent(query)}&count=1&page=1`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    reportsTableBody.innerHTML = data.html;
+                                    totalPermitsCount.textContent = 'Total Reports: ' + data.count;
+                                    if (paginationContainer) {
+                                        paginationContainer.style.display = 'none';
+                                    }
+                                });
                         }
-                    }, 0);
+                    }, 200); // Debounce for 200ms
                 });
             }
         });
@@ -890,37 +959,6 @@ $stmt->close();
                 logoutModal.style.display = 'none';
             }
         };
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const searchInput = document.querySelector('.search-input');
-            const reportsTableBody = document.getElementById('permitsTableBody');
-            const totalPermitsCount = document.getElementById('totalPermitsCount');
-
-            if (searchInput && reportsTableBody && totalPermitsCount) {
-                let searchTimeout;
-                searchInput.addEventListener('input', function () {
-                    clearTimeout(searchTimeout);
-                    searchTimeout = setTimeout(function () {
-                        const query = searchInput.value;
-                        if (query === '') {
-                            window.location.href = window.location.pathname + window.location.search.replace(/([?&])search=[^&]*/g, '');
-                        } else {
-                            // Always reset to page 1 when searching
-                            fetch(`my_fire_safety_reports_ajax.php?search=${encodeURIComponent(query)}&count=1&page=1`)
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.html.trim() === '') {
-                                        reportsTableBody.innerHTML = '<tr><td colspan="12" style="text-align:center;">No reports found.</td></tr>';
-                                    } else {
-                                        reportsTableBody.innerHTML = data.html;
-                                    }
-                                    totalPermitsCount.textContent = `Total Reports: ${data.count}`;
-                                });
-                        }
-                    }, 0);
-                });
-            }
-        });
     </script>
 </body>
 

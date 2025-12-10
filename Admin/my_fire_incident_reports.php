@@ -30,36 +30,50 @@ $where_clauses[] = "deleted_at IS NULL";
 $params = [];
 $param_types = '';
 
-// Only show reports uploaded by the current user
-$username = $_SESSION['username'];
-$where_clauses[] = "uploader = ?";
-$params[] = $username;
-$param_types .= 's';
 
-if (!empty($_GET['start_month'])) {
+// Only show reports uploaded by the current user (always restrict by uploader)
+$username = $_SESSION['username'];
+if (!in_array('uploader = ?', $where_clauses)) {
+    $where_clauses[] = "uploader = ?";
+    $params[] = $username;
+    $param_types .= 's';
+}
+
+// Monthly filter: filter incident_date between start and end of selected months
+if (!empty($_GET['start_month']) && !empty($_GET['end_month'])) {
+    $start = $_GET['start_month'] . '-01 00:00:00';
+    $end_month = $_GET['end_month'];
+    $last_day = date('t', strtotime($end_month . '-01'));
+    $end = $end_month . '-' . $last_day . ' 23:59:59';
+    $where_clauses[] = "incident_date BETWEEN ? AND ?";
+    $params[] = $start;
+    $params[] = $end;
+    $param_types .= 'ss';
+} elseif (!empty($_GET['start_month'])) {
     $start = $_GET['start_month'] . '-01 00:00:00';
     $where_clauses[] = "incident_date >= ?";
     $params[] = $start;
     $param_types .= 's';
-}
-
-if (!empty($_GET['search'])) {
-    $search = '%' . $_GET['search'] . '%';
-    $where_clauses[] = "(report_id LIKE ? OR report_title LIKE ? OR fire_location LIKE ? OR establishment LIKE ?)";
-    $params[] = $search;
-    $params[] = $search;
-    $params[] = $search;
-    $params[] = $search;
-    $param_types .= 'ssss';
-}
-
-if (!empty($_GET['end_month'])) {
+} elseif (!empty($_GET['end_month'])) {
     $end_month = $_GET['end_month'];
     $last_day = date('t', strtotime($end_month . '-01'));
     $end = $end_month . '-' . $last_day . ' 23:59:59';
     $where_clauses[] = "incident_date <= ?";
     $params[] = $end;
     $param_types .= 's';
+}
+
+if (!empty($_GET['search'])) {
+    $search = '%' . $_GET['search'] . '%';
+    $where_clauses[] = "(report_id LIKE ? OR report_title LIKE ? OR street LIKE ? OR purok LIKE ? OR fire_location LIKE ? OR municipality LIKE ? OR establishment LIKE ?)";
+    $params[] = $search;
+    $params[] = $search;
+    $params[] = $search;
+    $params[] = $search;
+    $params[] = $search;
+    $params[] = $search;
+    $params[] = $search;
+    $param_types .= 'sssssss';
 }
 
 $where_sql = '';
@@ -468,7 +482,28 @@ mysqli_close($conn);
                                         style="width:100%; text-align:left; border-radius:0; text-decoration: none;">Location</a>
                                 </div>
                             </div>
+                            <button id="toggleMonthFilterBtn" class="select-multi-btn" type="button"
+                                onclick="toggleMonthFilter()">
+                                <i style="color:#0096FF;" class="fa-solid fa-calendar"></i>
+                            </button>
+                            <div id="monthFilterContainer" style="display:none;">
+                                <form action="my_fire_incident_reports.php" method="GET"
+                                    style="display: flex; gap: 8px; align-items: center;">
+                                    <label>
+                                        <input type="month" name="start_month"
+                                            value="<?php echo isset($_GET['start_month']) ? htmlspecialchars($_GET['start_month']) : ''; ?>">
+                                    </label>
+                                    <span>to</span>
+                                    <label>
+                                        <input type="month" name="end_month"
+                                            value="<?php echo isset($_GET['end_month']) ? htmlspecialchars($_GET['end_month']) : ''; ?>">
+                                    </label>
+                                    <button type="submit" class="filter-multi-btn">Filter</button>
+                                    <a href="my_fire_incident_reports.php" class="clear-filter-multi-btn">Clear
+                                        Filter</a>
+                                </form>
 
+                            </div>
                             <form action="export_my_reports.php" method="GET" style="display:inline;">
                                 <input type="hidden" name="start_month"
                                     value="<?php echo isset($_GET['start_month']) ? htmlspecialchars($_GET['start_month']) : ''; ?>">
@@ -534,7 +569,7 @@ mysqli_close($conn);
                                         <td><?php echo htmlspecialchars($row['report_id']); ?></td>
                                         <td><?php echo htmlspecialchars($row['report_title']); ?></td>
                                         <td><?php echo htmlspecialchars($row['fire_location_combined']); ?></td>
-                                        <td><?php echo htmlspecialchars($row['created_at']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['incident_date']); ?></td>
                                         <td><?php echo htmlspecialchars($row['establishment']); ?></td>
                                         <td>
                                             <?php
@@ -987,62 +1022,10 @@ mysqli_close($conn);
                 });
             }
 
-
             document.addEventListener('DOMContentLoaded', function () {
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.get('start_month') || urlParams.get('end_month')) {
                     document.getElementById('monthFilterContainer').style.display = 'block';
-                }
-
-                // Month filter AJAX
-                const monthFilterForm = document.getElementById('monthFilterForm');
-                if (monthFilterForm) {
-                    monthFilterForm.addEventListener('submit', function (e) {
-                        e.preventDefault();
-                        const startMonth = monthFilterForm.elements['start_month'].value;
-                        const endMonth = monthFilterForm.elements['end_month'].value;
-                        const params = new URLSearchParams(window.location.search);
-                        if (startMonth) params.set('start_month', startMonth);
-                        else params.delete('start_month');
-                        if (endMonth) params.set('end_month', endMonth);
-                        else params.delete('end_month');
-                        params.set('count', '1');
-                        fetch('my_fire_incident_report_ajax.php?' + params.toString())
-                            .then(response => response.json())
-                            .then(data => {
-                                document.getElementById('reportsTableBody').innerHTML = data.html;
-                                if (document.getElementById('totalReportsCount') && typeof data.count !== 'undefined') {
-                                    document.getElementById('totalReportsCount').textContent = 'Total Reports: ' + data.count;
-                                }
-                                if (data.pagination && document.getElementById('paginationContainer')) {
-                                    document.getElementById('paginationContainer').innerHTML = data.pagination;
-                                }
-                            });
-                    });
-                }
-                // Clear filter button
-                const clearBtn = document.getElementById('clearMonthFilterBtn');
-                if (clearBtn) {
-                    clearBtn.addEventListener('click', function () {
-                        const params = new URLSearchParams(window.location.search);
-                        params.delete('start_month');
-                        params.delete('end_month');
-                        params.set('count', '1');
-                        fetch('my_fire_incident_report_ajax.php?' + params.toString())
-                            .then(response => response.json())
-                            .then(data => {
-                                document.getElementById('reportsTableBody').innerHTML = data.html;
-                                if (document.getElementById('totalReportsCount') && typeof data.count !== 'undefined') {
-                                    document.getElementById('totalReportsCount').textContent = 'Total Reports: ' + data.count;
-                                }
-                                if (data.pagination && document.getElementById('paginationContainer')) {
-                                    document.getElementById('paginationContainer').innerHTML = data.pagination;
-                                }
-                                // Clear input fields
-                                monthFilterForm.elements['start_month'].value = '';
-                                monthFilterForm.elements['end_month'].value = '';
-                            });
-                    });
                 }
             });
 

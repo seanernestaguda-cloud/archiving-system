@@ -850,7 +850,7 @@ textarea {
     /* Smooth transition */
 }
 
-#victims ul {
+#victims ul, #firefighters ul {
     list-style-type: disc;
     /* Add bullets */
     padding-left: 20px;
@@ -858,7 +858,7 @@ textarea {
     margin: 0;
 }
 
-#victims {
+#victims, #firefighters {
     list-style-type: disc;
     /* Keeps the bullets */
     padding-left: 20px;
@@ -889,14 +889,14 @@ textarea {
     /* Dark text for readability */
 }
 
-#victims[readonly] {
+#victims[readonly], #firefighters[readonly] {
     background-color: #f1f1f1;
     /* Light background for readonly state */
     cursor: not-allowed;
     /* Changes cursor to show it's not editable */
 }
 
-#victims li {
+#victims li, #firefighters li {
     margin-bottom: 5px;
     /* Add spacing between items */
 }

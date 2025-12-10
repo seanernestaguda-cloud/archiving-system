@@ -7,6 +7,13 @@ if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
+$sql_settings = "SELECT system_name FROM settings LIMIT 1";
+$result_settings = $conn->query($sql_settings);
+$system_name = 'BUREAU OF FIRE PROTECTION ARCHIVING SYSTEM';
+if ($result_settings && $row_settings = $result_settings->fetch_assoc()) {
+    $system_name = $row_settings['system_name'];
+}
+
 
 $allowed_sort_columns = ['report_id', 'report_title', 'created_at', 'fire_location'];
 $sort_by = isset($_GET['sort_by']) && in_array($_GET['sort_by'], $allowed_sort_columns) ? $_GET['sort_by'] : 'report_id';
@@ -23,36 +30,50 @@ $where_clauses[] = "deleted_at IS NULL";
 $params = [];
 $param_types = '';
 
-// Only show reports uploaded by the current user
-$username = $_SESSION['username'];
-$where_clauses[] = "uploader = ?";
-$params[] = $username;
-$param_types .= 's';
 
-if (!empty($_GET['start_month'])) {
+// Only show reports uploaded by the current user (always restrict by uploader)
+$username = $_SESSION['username'];
+if (!in_array('uploader = ?', $where_clauses)) {
+    $where_clauses[] = "uploader = ?";
+    $params[] = $username;
+    $param_types .= 's';
+}
+
+// Monthly filter: filter incident_date between start and end of selected months
+if (!empty($_GET['start_month']) && !empty($_GET['end_month'])) {
+    $start = $_GET['start_month'] . '-01 00:00:00';
+    $end_month = $_GET['end_month'];
+    $last_day = date('t', strtotime($end_month . '-01'));
+    $end = $end_month . '-' . $last_day . ' 23:59:59';
+    $where_clauses[] = "incident_date BETWEEN ? AND ?";
+    $params[] = $start;
+    $params[] = $end;
+    $param_types .= 'ss';
+} elseif (!empty($_GET['start_month'])) {
     $start = $_GET['start_month'] . '-01 00:00:00';
     $where_clauses[] = "incident_date >= ?";
     $params[] = $start;
     $param_types .= 's';
-}
-
-if (!empty($_GET['search'])) {
-    $search = '%' . $_GET['search'] . '%';
-    $where_clauses[] = "(report_id LIKE ? OR report_title LIKE ? OR fire_location LIKE ? OR establishment LIKE ?)";
-    $params[] = $search;
-    $params[] = $search;
-    $params[] = $search;
-    $params[] = $search;
-    $param_types .= 'ssss';
-}
-
-if (!empty($_GET['end_month'])) {
+} elseif (!empty($_GET['end_month'])) {
     $end_month = $_GET['end_month'];
     $last_day = date('t', strtotime($end_month . '-01'));
     $end = $end_month . '-' . $last_day . ' 23:59:59';
     $where_clauses[] = "incident_date <= ?";
     $params[] = $end;
     $param_types .= 's';
+}
+
+if (!empty($_GET['search'])) {
+    $search = '%' . $_GET['search'] . '%';
+    $where_clauses[] = "(report_id LIKE ? OR report_title LIKE ? OR street LIKE ? OR purok LIKE ? OR fire_location LIKE ? OR municipality LIKE ? OR establishment LIKE ?)";
+    $params[] = $search;
+    $params[] = $search;
+    $params[] = $search;
+    $params[] = $search;
+    $params[] = $search;
+    $params[] = $search;
+    $params[] = $search;
+    $param_types .= 'sssssss';
 }
 
 $where_sql = '';
@@ -98,7 +119,7 @@ $query = "SELECT
     firefighters,
     property_damage, 
     fire_types, 
-    created_at, 
+    created_at,
     uploader, 
     department,
     caller_name,
@@ -119,14 +140,6 @@ $stmt->execute();
 $result = $stmt->get_result();
 $reports = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
-
-$sql_settings = "SELECT system_name FROM settings LIMIT 1";
-$result_settings = $conn->query($sql_settings);
-$system_name = 'BUREAU OF FIRE PROTECTION ARCHIVING SYSTEM';
-if ($result_settings && $row_settings = $result_settings->fetch_assoc()) {
-    $system_name = $row_settings['system_name'];
-}
-
 mysqli_close($conn);
 ?>
 <!DOCTYPE html>
@@ -358,13 +371,15 @@ mysqli_close($conn);
                     <li class="archive-text">
                         <h4><?php echo htmlspecialchars($system_name); ?></h4>
                     </li>
-                    <li><a href="userdashboard.php"><i class="fa-solid fa-gauge"></i> <span>Dashboard</span></a></li>
+                    <li><a href="admindashboard.php"><i class="fa-solid fa-gauge"></i> <span>Dashboard</span></a></li>
                     <li class="archive-text">
                         <p>Archives</p>
                     </li>
-                    <!-- <li><a href="fire_types.php"><i class="fa-solid fa-fire-flame-curved"></i><span> Causes of Fire </span></a></li>
-                <li><a href="barangay_list.php"><i class="fa-solid fa-building"></i><span> Barangay List </span></a></li> -->
-                    <li><a href="myarchives.php"><i class="fa-solid fa-box-archive"></i><span> My Archives </span></a>
+                    <!-- <li><a href="fire_types.php"><i class="fa-solid fa-fire-flame-curved"></i><span> Causes of Fire
+                            </span></a></li>
+                    <li><a href="barangay_list.php"><i class="fa-solid fa-map-location-dot"></i><span> Barangay List
+                            </span></a></li> -->
+                    <li><a href="myarchives.php"><i class="fa-solid fa-box-archive"></i><span> My Archives</span></a>
                     </li>
                     <li><a href="archives.php"><i class="fa-solid fa-fire"></i><span> Archives </span></a></li>
 
@@ -385,10 +400,11 @@ mysqli_close($conn);
                     </li>
 
                     <!-- <li class="archive-text"><span>Maintenance</span></li>
-                <li><a href="activity_logs.php"><i class="fa-solid fa-file-invoice"></i><span> Activity Logs </span></a></li>
-                <li><a href="departments.php"><i class="fas fa-users"></i><span> Department List </span></a></li>
-                <li><a href="manageuser.php"><i class="fas fa-users"></i><span> Manage Users </span></a></li>
-                <li><a href="setting.php"><i class="fa-solid fa-gear"></i> <span>Settings</span></a></li> -->
+                    <li><a href="activity_logs.php"><i class="fa-solid fa-file-invoice"></i><span> Activity Logs
+                            </span></a></li>
+                    <li><a href="departments.php"><i class="fas fa-users"></i><span> Department List </span></a></li>
+                    <li><a href="manageuser.php"><i class="fas fa-users"></i><span> Manage Users </span></a></li>
+                    <li><a href="setting.php"><i class="fa-solid fa-gear"></i> <span>Settings</span></a></li> -->
                 </ul>
             </nav>
         </aside>
@@ -417,7 +433,7 @@ mysqli_close($conn);
             <div class="card">
                 <section class="archive-section">
                     <h3><?php echo htmlspecialchars($_SESSION['username']); ?>'s Fire Incident Reports</h3>
-                    <p> List of Fire Incident Reports</p>
+                    <p>List of Fire Incident Reports</p>
                     <br>
                     <p id="totalReportsCount" style="font-weight:bold; color:#003D73; margin-bottom:10px;">Total
                         Reports: <?php echo number_format($total_reports); ?></p>
@@ -466,7 +482,28 @@ mysqli_close($conn);
                                         style="width:100%; text-align:left; border-radius:0; text-decoration: none;">Location</a>
                                 </div>
                             </div>
+                            <button id="toggleMonthFilterBtn" class="select-multi-btn" type="button"
+                                onclick="toggleMonthFilter()">
+                                <i style="color:#0096FF;" class="fa-solid fa-calendar"></i>
+                            </button>
+                            <div id="monthFilterContainer" style="display:none;">
+                                <form action="my_fire_incident_reports.php" method="GET"
+                                    style="display: flex; gap: 8px; align-items: center;">
+                                    <label>
+                                        <input type="month" name="start_month"
+                                            value="<?php echo isset($_GET['start_month']) ? htmlspecialchars($_GET['start_month']) : ''; ?>">
+                                    </label>
+                                    <span>to</span>
+                                    <label>
+                                        <input type="month" name="end_month"
+                                            value="<?php echo isset($_GET['end_month']) ? htmlspecialchars($_GET['end_month']) : ''; ?>">
+                                    </label>
+                                    <button type="submit" class="filter-multi-btn">Filter</button>
+                                    <a href="my_fire_incident_reports.php" class="clear-filter-multi-btn">Clear
+                                        Filter</a>
+                                </form>
 
+                            </div>
                             <form action="export_my_reports.php" method="GET" style="display:inline;">
                                 <input type="hidden" name="start_month"
                                     value="<?php echo isset($_GET['start_month']) ? htmlspecialchars($_GET['start_month']) : ''; ?>">
@@ -479,11 +516,10 @@ mysqli_close($conn);
                                     <label for="">.csv</label>
                                 </button>
                             </form>
-                            <button type="button" class="select-multi-btn" id="printTableBtn" style="margin-left: 5px;">
+                            <button type="button" class="select-multi-btn" id="printTableBtn" style="margin-left:4px;">
                                 <i class="fa-solid fa-print" style="color: #003D73;"></i>
                                 <label for="">Print</label>
                             </button>
-                            </form>
                         </div>
 
 
@@ -507,12 +543,12 @@ mysqli_close($conn);
                                 <th> Report ID </th>
                                 <th>Report Title</th>
                                 <th>Location</th>
-                                <th>Time and Date</th>
+                                <th>Time and Date of Fire</th>
                                 <th>Establishment</th>
                                 <th>Casualties</th>
                                 <th>Damage to Property</th>
                                 <th>Cause of Fire</th>
-                                <th>Created At</th>
+                                <th>Date Created</th>
                                 <th>Status</th>
                                 <th>Action</th>
 
@@ -533,7 +569,7 @@ mysqli_close($conn);
                                         <td><?php echo htmlspecialchars($row['report_id']); ?></td>
                                         <td><?php echo htmlspecialchars($row['report_title']); ?></td>
                                         <td><?php echo htmlspecialchars($row['fire_location_combined']); ?></td>
-                                        <td><?php echo htmlspecialchars($row['created_at']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['incident_date']); ?></td>
                                         <td><?php echo htmlspecialchars($row['establishment']); ?></td>
                                         <td>
                                             <?php
@@ -544,7 +580,9 @@ mysqli_close($conn);
                                         </td>
                                         <td><?php echo htmlspecialchars("₱" . $row['property_damage']); ?></td>
                                         <td><?php echo empty($row['fire_types']) ? 'Under Investigation' : htmlspecialchars($row['fire_types']); ?>
-                                        <td><?php echo htmlspecialchars($row['created_at'] ?? ''); ?></td>
+                                        </td>
+                                        <td><?php echo !empty($row['created_at']) ? htmlspecialchars($row['created_at']) : 'N/A'; ?>
+                                        </td>
                                         <td>
                                             <?php
                                             // List all required fields from your create form
@@ -600,10 +638,8 @@ mysqli_close($conn);
 
                     <?php
                     $total_pages = ceil($total_reports / $per_page);
-                    // Hide pagination if searching
-                    $is_searching = !empty($_GET['search']);
-                    if ($total_pages > 1 && !$is_searching): ?>
-                        <div class="pagination" style="margin: 20px 0; text-align: center;">
+                    if ($total_pages > 1): ?>
+                        <div id="paginationContainer" class="pagination" style="margin: 20px 0; text-align: center;">
                             <?php if ($page > 1): ?>
                                 <a href="?<?php
                                 $params = $_GET;
@@ -665,53 +701,63 @@ mysqli_close($conn);
             </div>
         </div>
 
-
+        <div id="logoutModal" class="confirm-delete-modal">
+            <div class="modal-content">
+                <h3 style="margin-bottom:10px;">Confirm Logout?</h3>
+                <hr>
+                <p style="margin-bottom:24px;">Are you sure you want to logout?</p>
+                <button id="confirmLogout" class="confirm-btn">Logout</button>
+                <button id="cancelLogout" class="cancel-btn">Cancel</button>
+            </div>
+        </div>
+        <div id="successModal" class="success-modal">
+            <div class="success-modal-content">
+                <i class="fa-regular fa-circle-check"></i>
+                <h2>Success!</h2>
+                <p id="successMessage"></p>
+            </div>
+        </div>
         <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                // Print Table Button functionality
+            // Print button functionality (table only, no buttons and no action column)
+            document.addEventListener('DOMContentLoaded', function () {
                 const printBtn = document.getElementById('printTableBtn');
                 if (printBtn) {
                     printBtn.addEventListener('click', function () {
                         const table = document.querySelector('.archive-table');
-                        if (!table) return;
-                        // Clone table to avoid modifying the original
-                        const tableClone = table.cloneNode(true);
-                        // Remove Action column from thead
-                        const theadRow = tableClone.querySelector('thead tr');
-                        if (theadRow) {
-                            let actionColIndex = -1;
-                            Array.from(theadRow.children).forEach((th, idx) => {
-                                if (th.textContent.trim().toLowerCase() === 'action') {
-                                    actionColIndex = idx;
+                        const totalReports = document.getElementById('totalReportsCount');
+                        if (table) {
+                            // Clone the table so we can modify it for printing
+                            const tableClone = table.cloneNode(true);
+                            // Remove the last header cell (Action)
+                            const headerRow = tableClone.querySelector('thead tr');
+                            if (headerRow && headerRow.lastElementChild) {
+                                headerRow.removeChild(headerRow.lastElementChild);
+                            }
+                            // Remove the last cell from each body row (Action)
+                            const bodyRows = tableClone.querySelectorAll('tbody tr');
+                            bodyRows.forEach(row => {
+                                if (row.lastElementChild) {
+                                    row.removeChild(row.lastElementChild);
                                 }
                             });
-                            if (actionColIndex !== -1) {
-                                theadRow.removeChild(theadRow.children[actionColIndex]);
+                            const printWindow = window.open('', '', 'height=700,width=1000');
+                            printWindow.document.write('<html><head><title>Print My Fire Incident Reports</title>');
+                            printWindow.document.write('<link rel="stylesheet" href="reportstyle.css">');
+                            printWindow.document.write('<link rel="stylesheet" href="modal.css">');
+                            printWindow.document.write('<link rel="stylesheet" href="../css/all.min.css">');
+                            printWindow.document.write('<link rel="stylesheet" href="../css/fontawesome.min.css">');
+                            printWindow.document.write('</head><body >');
+                            if (totalReports) {
+                                printWindow.document.write('<div style="font-weight:bold; color:#003D73; margin-bottom:10px;">' + totalReports.textContent + '</div>');
                             }
+                            printWindow.document.write(tableClone.outerHTML);
+                            printWindow.document.write('</body></html>');
+                            printWindow.document.close();
+                            printWindow.focus();
+                            setTimeout(function () {
+                                printWindow.print();
+                            }, 500);
                         }
-                        // Remove Action column from tbody
-                        const rows = tableClone.querySelectorAll('tbody tr');
-                        rows.forEach(row => {
-                            if (row.children.length > 0) {
-                                row.removeChild(row.lastElementChild);
-                            }
-                        });
-                        // Remove Action column from tfoot if present
-                        const tfootRow = tableClone.querySelector('tfoot tr');
-                        if (tfootRow && tfootRow.children.length > 0) {
-                            tfootRow.removeChild(tfootRow.lastElementChild);
-                        }
-                        const newWin = window.open('', '', 'width=900,height=700');
-                        newWin.document.write('<html><head><title>Print Table</title>');
-                        newWin.document.write('<link rel="stylesheet" href="reportstyle.css">');
-                        newWin.document.write('</head><body >');
-                        newWin.document.write(tableClone.outerHTML);
-                        newWin.document.write('</body></html>');
-                        newWin.document.close();
-                        newWin.focus();
-                        setTimeout(() => {
-                            newWin.print();
-                        }, 500);
                     });
                 }
             });
@@ -742,6 +788,33 @@ mysqli_close($conn);
                     }
                 });
             });
+
+            document.addEventListener('DOMContentLoaded', function () {
+                // Show Confirm Logout Modal
+                document.getElementById('logoutLink').addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.getElementById('logoutModal').style.display = 'flex';
+                    document.getElementById('profileDropdown').classList.remove('show'); // <-- Add this line
+                });
+
+                // Handle Confirm Logout
+                document.getElementById('confirmLogout').addEventListener('click', function () {
+                    window.location.href = 'logout.php';
+                });
+
+                // Handle Cancel Logout
+                document.getElementById('cancelLogout').addEventListener('click', function () {
+                    document.getElementById('logoutModal').style.display = 'none';
+                });
+            });
+
+            window.onclick = function (event) {
+                // ...existing code...
+                const logoutModal = document.getElementById('logoutModal');
+                if (event.target === logoutModal) {
+                    logoutModal.style.display = 'none';
+                }
+            };
             document.addEventListener('DOMContentLoaded', () => {
                 // Check if there's a session message and show modal if it's a success
                 const message = '<?php echo isset($_SESSION['message']) ? $_SESSION['message'] : ''; ?>';
@@ -812,58 +885,105 @@ mysqli_close($conn);
                 selectedToDelete = []; // Make sure multi-delete is not set
                 singleDeleteId = report_id; // Set single delete ID
                 document.getElementById('confirmDeleteModal').style.display = 'flex';
-            }
-
-            // Confirm delete handler for both single and multi delete
-            document.getElementById('confirmDeleteBtn').onclick = function () {
-                if (singleDeleteId) {
-                    // Single delete
-                    fetch('delete_report.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: 'report_id=' + encodeURIComponent(singleDeleteId)
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                openSuccessModal();
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 1200); // Wait for success modal before reload
-                            } else {
-                                alert('Error deleting report: ' + (data.error || 'Unknown error'));
-                            }
-                            singleDeleteId = null;
-                            closeDeleteModal();
-                        });
-                } else if (selectedToDelete.length > 0) {
-                    // Multi delete
+                // Attach confirm handler for single delete
+                var confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+                confirmDeleteBtn.onclick = function () {
+                    // Send AJAX request to delete_selected_reports.php
                     fetch('delete_selected_reports.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            report_ids: selectedToDelete
+                            report_ids: [singleDeleteId]
                         })
                     })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
+                                refreshReportsTable();
                                 openSuccessModal();
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 1200); // Wait for success modal before reload
                             } else {
-                                alert('Error deleting reports.');
+                                alert('Delete failed: ' + (data.error || 'Unknown error'));
                             }
-                            selectedToDelete = [];
+                            closeDeleteModal();
+                        })
+                        .catch(err => {
+                            alert('AJAX error: ' + err);
                             closeDeleteModal();
                         });
+                };
+            }
+
+            // Confirm delete handler for both single and multi delete
+            document.addEventListener('DOMContentLoaded', function () {
+                var confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+                if (confirmDeleteBtn) {
+                    confirmDeleteBtn.onclick = function () {
+                        if (singleDeleteId) {
+                            // Single delete
+                            fetch('delete_report.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                body: 'report_id=' + encodeURIComponent(singleDeleteId)
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        refreshReportsTable();
+                                        openSuccessModal();
+                                    } else {
+                                        alert('Error deleting report: ' + (data.error || 'Unknown error'));
+                                    }
+                                    singleDeleteId = null;
+                                    closeDeleteModal();
+                                });
+                        } else if (selectedToDelete.length > 0) {
+                            // Multi delete
+                            fetch('delete_selected_reports.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    report_ids: selectedToDelete
+                                })
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        refreshReportsTable();
+                                        openSuccessModal();
+                                    } else {
+                                        alert('Error deleting reports.');
+                                    }
+                                    selectedToDelete = [];
+                                    closeDeleteModal();
+                                });
+                        }
+                    };
                 }
-            };
+            });
+            // Refresh the reports table via AJAX and update total count
+            function refreshReportsTable() {
+                // Preserve current search, sort, filter, and page params
+                const params = new URLSearchParams(window.location.search);
+                params.set('count', '1');
+                fetch('my_fire_incident_report_ajax.php?' + params.toString())
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('reportsTableBody').innerHTML = data.html;
+                        if (document.getElementById('totalReportsCount') && typeof data.count !== 'undefined') {
+                            document.getElementById('totalReportsCount').textContent = 'Total Reports: ' + data.count;
+                        }
+                        // Optionally, refresh pagination if your AJAX returns it
+                        if (data.pagination && document.getElementById('paginationContainer')) {
+                            document.getElementById('paginationContainer').innerHTML = data.pagination;
+                        }
+                    });
+            }
 
             function closeDeleteModal() {
                 document.getElementById('confirmDeleteModal').style.display = 'none';
@@ -913,6 +1033,7 @@ mysqli_close($conn);
                 const searchInput = document.querySelector('.search-input');
                 const reportsTableBody = document.getElementById('reportsTableBody');
                 const totalReportsCount = document.getElementById('totalReportsCount');
+                const paginationContainer = document.getElementById('paginationContainer');
 
                 if (searchInput && reportsTableBody && totalReportsCount) {
                     let searchTimeout;
@@ -922,12 +1043,18 @@ mysqli_close($conn);
                             const query = searchInput.value;
                             if (query === '') {
                                 window.location.href = window.location.pathname + window.location.search.replace(/([?&])search=[^&]*/g, '');
+                                if (paginationContainer) {
+                                    paginationContainer.style.display = '';
+                                }
                             } else {
                                 fetch(`my_fire_incident_report_ajax.php?search=${encodeURIComponent(query)}&count=1`)
                                     .then(response => response.json())
                                     .then(data => {
                                         reportsTableBody.innerHTML = data.html;
-                                        totalReportsCount.textContent = `Total Reports: ${data.count}`;
+                                        totalReportsCount.textContent = 'Total Reports: ' + data.count;
+                                        if (paginationContainer) {
+                                            paginationContainer.style.display = 'none';
+                                        }
                                     });
                             }
                         }, 0);
@@ -940,45 +1067,7 @@ mysqli_close($conn);
                     });
                 }
             });
-
-            document.addEventListener('DOMContentLoaded', function () {
-                // Show Confirm Logout Modal
-                document.getElementById('logoutLink').addEventListener('click', function (e) {
-                    e.preventDefault();
-                    document.getElementById('logoutModal').style.display = 'flex';
-                    document.getElementById('profileDropdown').classList.remove('show'); // <-- Add this line
-                });
-
-                // Handle Confirm Logout
-                document.getElementById('confirmLogout').addEventListener('click', function () {
-                    window.location.href = 'logout.php';
-                });
-
-                // Handle Cancel Logout
-                document.getElementById('cancelLogout').addEventListener('click', function () {
-                    document.getElementById('logoutModal').style.display = 'none';
-                });
-            });
-
-            window.onclick = function (event) {
-                // ...existing code...
-                const logoutModal = document.getElementById('logoutModal');
-                if (event.target === logoutModal) {
-                    logoutModal.style.display = 'none';
-                }
-            };
         </script>
-
-
-        <div id="logoutModal" class="confirm-delete-modal">
-            <div class="modal-content">
-                <h3 style="margin-bottom:10px;">Confirm Logout?</h3>
-                <hr>
-                <p style="margin-bottom:24px;">Are you sure you want to logout?</p>
-                <button id="confirmLogout" class="confirm-btn">Logout</button>
-                <button id="cancelLogout" class="cancel-btn">Cancel</button>
-            </div>
-        </div>
 </body>
 
 </html>
