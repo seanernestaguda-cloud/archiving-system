@@ -272,8 +272,8 @@ body {
 .archive-table td {
     padding: 8px 5px;
     font-size: 13px;
-     border: 1px solid #e0e0e0;
-     white-space:normal;
+    border: 1px solid #e0e0e0;
+    white-space: normal;
 }
 
 .archive-table td {
@@ -1298,18 +1298,24 @@ fieldset {
 }
 
 .tab-btn {
-    background: #003D73;
-    color: #fff;
-    border: none;
-    border-radius: 4px 4px 0 0;
+    background: #ffff;
+    color: #003D73;
+    border: 1px solid #003D73;
+    border-radius: 10px;
     padding: 10px 20px;
     cursor: pointer;
     font-weight: bold;
 }
 
 .tab-btn.active {
-    background: #002D57;
+    background: #003D73;
+    color: #ffff;
     border-bottom: 2px solid #fff;
+}
+
+.tab-btn:hover {
+    background: #003D73;
+    color: #ffff;
 }
 
 .tab-content {

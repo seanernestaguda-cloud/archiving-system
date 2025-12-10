@@ -99,14 +99,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         return $existingPath;
     }
 
-    // Get existing file paths from $row
-    $application_form = handleFileUpload('application_form_file', $row['application_form'], $uploadDir);
-    $proof_of_ownership = handleFileUpload('proof_of_ownership_file', $row['proof_of_ownership'], $uploadDir);
-    $building_plans = handleFileUpload('building_plans_file', $row['building_plans'], $uploadDir);
-    $fire_safety_inspection_checklist = handleFileUpload('fire_safety_inspection_checklist_file', $row['fire_safety_inspection_checklist'], $uploadDir);
-    $fire_safety_inspection_certificate = handleFileUpload('fire_safety_inspection_certificate_file', $row['fire_safety_inspection_certificate'], $uploadDir);
-    $occupancy_permit = handleFileUpload('occupancy_permit_file', $row['occupancy_permit'], $uploadDir);
-    $business_permit = handleFileUpload('business_permit_file', $row['business_permit'], $uploadDir);
+    // Handle file deletions if requested
+    function handleFileDelete($deleteField, $existingPath)
+    {
+        if (isset($_POST[$deleteField]) && $_POST[$deleteField] == '1' && !empty($existingPath) && file_exists($existingPath)) {
+            @unlink($existingPath);
+            return '';
+        }
+        return $existingPath;
+    }
+
+    $application_form = handleFileDelete('delete_application_form', $row['application_form']);
+    $proof_of_ownership = handleFileDelete('delete_proof_of_ownership', $row['proof_of_ownership']);
+    $building_plans = handleFileDelete('delete_building_plans', $row['building_plans']);
+    $fire_safety_inspection_checklist = handleFileDelete('delete_fire_safety_inspection_checklist', $row['fire_safety_inspection_checklist']);
+    $fire_safety_inspection_certificate = handleFileDelete('delete_fire_safety_inspection_certificate', $row['fire_safety_inspection_certificate']);
+    $occupancy_permit = handleFileDelete('delete_occupancy_permit', $row['occupancy_permit']);
+    $business_permit = handleFileDelete('delete_business_permit', $row['business_permit']);
+
+    // Now handle file uploads (if not deleted, allow replacement)
+    $application_form = handleFileUpload('application_form_file', $application_form, $uploadDir);
+    $proof_of_ownership = handleFileUpload('proof_of_ownership_file', $proof_of_ownership, $uploadDir);
+    $building_plans = handleFileUpload('building_plans_file', $building_plans, $uploadDir);
+    $fire_safety_inspection_checklist = handleFileUpload('fire_safety_inspection_checklist_file', $fire_safety_inspection_checklist, $uploadDir);
+    $fire_safety_inspection_certificate = handleFileUpload('fire_safety_inspection_certificate_file', $fire_safety_inspection_certificate, $uploadDir);
+    $occupancy_permit = handleFileUpload('occupancy_permit_file', $occupancy_permit, $uploadDir);
+    $business_permit = handleFileUpload('business_permit_file', $business_permit, $uploadDir);
 
     // Prepare SQL statement to update the data, including file columns
     $stmt = $conn->prepare("UPDATE fire_safety_inspection_certificate 
@@ -309,7 +327,7 @@ mysqli_close($conn);
 
         .custom-file-upload {
             cursor: pointer;
-            font-size: 20px;
+            font-size: 14px;
             color: #444444;
             margin-right: 10px;
             vertical-align: middle;
@@ -321,7 +339,7 @@ mysqli_close($conn);
             border: 1px solid #003d73;
             background-color: #fff;
             padding: 20px;
-            border-radius: 30px;
+            border-radius: 10px;
         }
 
         .custom-file-upload i:hover {
@@ -383,9 +401,6 @@ mysqli_close($conn);
             background: #c0392b;
         }
 
-        iframe {
-            margin-bottom: 15px;
-        }
 
         .title-part {
             background: #003D73;
@@ -421,6 +436,24 @@ mysqli_close($conn);
             background: #fff;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
         }
+
+        .narrative-preview,
+        .narrative-report,
+        .permit-doc-section {
+            display: block;
+            width: 100%;
+            max-width: auto;
+            /* or a larger value, or remove this line */
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .narrative-preview iframe {
+            width: 100%;
+            height: 300px;
+            /* or your desired height */
+            display: block;
+        }
     </style>
 </head>
 
@@ -437,8 +470,10 @@ mysqli_close($conn);
                     <li class="archive-text">
                         <p>Archives</p>
                     </li>
-                    <!-- <li><a href="fire_types.php"><i class="fa-solid fa-fire-flame-curved"></i><span> Causes of Fire </span></a></li>
-                <li><a href="barangay_list.php"><i class="fa-solid fa-map-location-dot"></i><span> Barangay List </span></a></li> -->
+                    <!-- <li><a href="fire_types.php"><i class="fa-solid fa-fire-flame-curved"></i><span> Causes of Fire
+                            </span></a></li>
+                    <li><a href="barangay_list.php"><i class="fa-solid fa-map-location-dot"></i><span> Barangay List
+                            </span></a></li> -->
                     <li><a href="myarchives.php"><i class="fa-solid fa-box-archive"></i><span> My Archives</span></a>
                     </li>
                     <li><a href="archives.php"><i class="fa-solid fa-fire"></i><span> Archives </span></a></li>
@@ -460,10 +495,11 @@ mysqli_close($conn);
                     </li>
 
                     <!-- <li class="archive-text"><span>Maintenance</span></li>
-                <li><a href="activity_logs.php"><i class="fa-solid fa-file-invoice"></i><span> Activity Logs </span></a></li>
-                <li><a href="departments.php"><i class="fas fa-users"></i><span> Department List </span></a></li>
-                <li><a href="manageuser.php"><i class="fas fa-users"></i><span> Manage Users </span></a></li>
-                <li><a href="setting.php"><i class="fa-solid fa-gear"></i> <span>Settings</span></a></li> -->
+                    <li><a href="activity_logs.php"><i class="fa-solid fa-file-invoice"></i><span> Activity Logs
+                            </span></a></li>
+                    <li><a href="departments.php"><i class="fas fa-users"></i><span> Department List </span></a></li>
+                    <li><a href="manageuser.php"><i class="fas fa-users"></i><span> Manage Users </span></a></li>
+                    <li><a href="setting.php"><i class="fa-solid fa-gear"></i> <span>Settings</span></a></li> -->
                 </ul>
             </nav>
         </aside>
@@ -709,8 +745,12 @@ mysqli_close($conn);
                             <!-- Application Form -->
                             <div id="application_form_section" class="permit-doc-section" style="display:none;">
                                 <div class="form-group">
+                                    <div class="empty-message"
+                                        style="color: #b23c3c; background: #fff3f3; border: 1px solid #f5c2c7; border-radius: 6px; padding: 18px 0; margin: 18px 0 0 0; text-align: center; font-size: 1.08em; font-weight: 500; letter-spacing: 0.2px; display: <?php echo empty($row['application_form']) ? 'block' : 'none'; ?>;">
+                                        No application form uploaded yet.</div><br>
                                     <div class="narrative-report">
                                         <?php if (!empty($row['application_form'])): ?>
+                                            <h4> Application Form </h4><br>
                                             <a href="<?php echo $row['application_form']; ?>" target="_blank"
                                                 class="btn-view"><i class="fa-solid fa-eye"></i></a>
                                             <a href="<?php echo $row['application_form']; ?>" download
@@ -718,7 +758,6 @@ mysqli_close($conn);
                                             <button type="button" class="btn btn-delete"
                                                 onclick="deleteReportFile('application_form', <?php echo $id; ?>)"><i
                                                     class="fa-solid fa-trash"></i></button>
-                                        <?php else: ?>
                                         <?php endif; ?>
                                         <div id="application-preview" class="narrative-preview">
                                             <?php if (!empty($row['application_form'])): ?>
@@ -735,32 +774,34 @@ mysqli_close($conn);
                                                 <?php } ?>
                                             <?php endif; ?>
                                         </div>
-                                    </div>
-                                    <?php if ($can_edit) { ?>
-                                        <label for="application_form_file" class="custom-file-upload">
-                                            <?php if (empty($row['application_form'])) { ?>
-                                                <i class="fa-solid fa-plus"></i>
-                                            <?php } else { ?>
-                                                <i class="fa-solid fa-pen-to-square"></i>
-                                            <?php } ?>
-                                        </label>
-                                        <label for="application_form_file" style="font-weight: lighter;">
-                                            <?php echo empty($row['application_form']) ? 'Add New' : 'Change'; ?>
-                                            Application Form (BFP)
-                                        </label>
-                                        <input type="file" id="application_form_file" name="application_form_file"
-                                            class="form-control" accept=".pdf,.doc,.docx,.txt,.rtf"
-                                            onchange="previewPermitFile(event, 'application-preview')" style="display:none;"
-                                            <?php echo !$can_edit ? 'disabled' : ''; ?>>
-                                    <?php } ?>
+                                    </div><br>
+                                    <label for="application_form">
+                                        <?php echo empty($row['application_form']) ? 'Add New Application Form (BFP):' : 'Change Application Form (BFP):'; ?>
+                                    </label>
+                                    <label for="application_form_file" class="custom-file-upload">
+                                        <?php if (empty($row['application_form'])) { ?>
+                                            <i class="fa-solid fa-plus"></i>
+                                        <?php } else { ?>
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        <?php } ?>
+                                    </label>
+                                    <input type="file" id="application_form_file" name="application_form_file"
+                                        class="form-control" accept=".pdf,.doc,.docx,.txt,.rtf"
+                                        onchange="previewPermitFile(event, 'application-preview')" <?php echo !$can_edit ? 'disabled' : ''; ?>>
+                                    <input type="hidden" name="delete_application_form" id="delete_application_form"
+                                        value="0">
                                 </div>
                             </div>
 
                             <!-- Proof of Ownership -->
                             <div id="proof_of_ownership_section" class="permit-doc-section" style="display:none;">
                                 <div class="form-group">
+                                    <div class="empty-message"
+                                        style="color: #b23c3c; background: #fff3f3; border: 1px solid #f5c2c7; border-radius: 6px; padding: 18px 0; margin: 18px 0 0 0; text-align: center; font-size: 1.08em; font-weight: 500; letter-spacing: 0.2px; display: <?php echo empty($row['proof_of_ownership']) ? 'block' : 'none'; ?>;">
+                                        No proof of ownership uploaded yet.</div><br>
                                     <div class="narrative-report">
                                         <?php if (!empty($row['proof_of_ownership'])): ?>
+                                            <h4> Proof Of Ownership </h4><br>
                                             <a href="<?php echo $row['proof_of_ownership']; ?>" target="_blank"
                                                 class="btn-view"><i class="fa-solid fa-eye"></i></a>
                                             <a href="<?php echo $row['proof_of_ownership']; ?>" download
@@ -768,7 +809,6 @@ mysqli_close($conn);
                                             <button type="button" class="btn btn-delete"
                                                 onclick="deleteReportFile('proof_of_ownership', <?php echo $id; ?>)"><i
                                                     class="fa-solid fa-trash"></i></button>
-                                        <?php else: ?>
                                         <?php endif; ?>
                                         <div id="ownership-preview" class="narrative-preview">
                                             <?php if (!empty($row['proof_of_ownership'])): ?>
@@ -785,24 +825,22 @@ mysqli_close($conn);
                                                 <?php } ?>
                                             <?php endif; ?>
                                         </div>
-                                    </div>
-                                    <?php if ($can_edit) { ?>
-                                        <label for="proof_of_ownership_file" class="custom-file-upload">
-                                            <?php if (empty($row['proof_of_ownership'])) { ?>
-                                                <i class="fa-solid fa-plus"></i>
-                                            <?php } else { ?>
-                                                <i class="fa-solid fa-pen-to-square"></i>
-                                            <?php } ?>
-                                        </label>
-                                        <label for="proof_of_ownership_file" style="font-weight: lighter;">
-                                            <?php echo empty($row['proof_of_ownership']) ? 'Add New' : 'Change'; ?> Proof of
-                                            Ownership
-                                        </label>
-                                        <input type="file" id="proof_of_ownership_file" name="proof_of_ownership_file"
-                                            class="form-control" accept=".pdf,.doc,.docx,.txt,.rtf"
-                                            onchange="previewPermitFile(event, 'ownership-preview')" style="display:none;"
-                                            <?php echo !$can_edit ? 'disabled' : ''; ?>>
-                                    <?php } ?>
+                                    </div><br>
+                                    <label for="proof_of_ownership">
+                                        <?php echo empty($row['proof_of_ownership']) ? 'Add New Proof of Ownership:' : 'Change Proof of Ownership:'; ?>
+                                    </label>
+                                    <label for="proof_of_ownership_file" class="custom-file-upload">
+                                        <?php if (empty($row['proof_of_ownership'])) { ?>
+                                            <i class="fa-solid fa-plus"></i>
+                                        <?php } else { ?>
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        <?php } ?>
+                                    </label>
+                                    <input type="file" id="proof_of_ownership_file" name="proof_of_ownership_file"
+                                        class="form-control" accept=".pdf,.doc,.docx,.txt,.rtf"
+                                        onchange="previewPermitFile(event, 'ownership-preview')" <?php echo !$can_edit ? 'disabled' : ''; ?>>
+                                    <input type="hidden" name="delete_proof_of_ownership" id="delete_proof_of_ownership"
+                                        value="0">
                                 </div>
                             </div>
 
@@ -840,15 +878,19 @@ mysqli_close($conn);
                             <div id="fire_safety_inspection_checklist_section" class="permit-doc-section"
                                 style="display:none;">
                                 <div class="form-group">
+                                    <div class="empty-message"
+                                        style="color: #b23c3c; background: #fff3f3; border: 1px solid #f5c2c7; border-radius: 6px; padding: 18px 0; margin: 18px 0 0 0; text-align: center; font-size: 1.08em; font-weight: 500; letter-spacing: 0.2px; display: <?php echo empty($row['fire_safety_inspection_checklist']) ? 'block' : 'none'; ?>;">
+                                        No fire safety inspection checklist uploaded yet.</div><br>
                                     <div class="narrative-report">
                                         <?php if (!empty($row['fire_safety_inspection_checklist'])): ?>
+                                            <h4> Fire Safety Inspection Checklist </h4><br>
                                             <a href="<?php echo $row['fire_safety_inspection_checklist']; ?>"
                                                 target="_blank" class="btn-view"><i class="fa-solid fa-eye"></i></a>
                                             <a href="<?php echo $row['fire_safety_inspection_checklist']; ?>" download
                                                 class="btn-download"><i class="fa-solid fa-download"></i></a>
                                             <button type="button" class="btn btn-delete"
                                                 onclick="deleteReportFile('fire_safety_inspection_checklist', <?php echo $id; ?>)"><i
-                                                    class="fa-solid fa-trash"></i></button> <?php else: ?>
+                                                    class="fa-solid fa-trash"></i></button>
                                         <?php endif; ?>
                                         <div id="checklist-preview" class="narrative-preview">
                                             <?php if (!empty($row['fire_safety_inspection_checklist'])): ?>
@@ -866,25 +908,23 @@ mysqli_close($conn);
                                                 <?php } ?>
                                             <?php endif; ?>
                                         </div>
-                                    </div>
-                                    <?php if ($can_edit) { ?>
-                                        <label for="fire_safety_inspection_checklist_file" class="custom-file-upload">
-                                            <?php if (empty($row['fire_safety_inspection_checklist'])) { ?>
-                                                <i class="fa-solid fa-plus"></i>
-                                            <?php } else { ?>
-                                                <i class="fa-solid fa-pen-to-square"></i>
-                                            <?php } ?>
-                                        </label>
-                                        <label for="fire_safety_inspection_checklist_file" style="font-weight: lighter;">
-                                            <?php echo empty($row['fire_safety_inspection_checklist']) ? 'Add New' : 'Change'; ?>
-                                            Fire Safety Inspection Checklist
-                                        </label>
-                                        <input type="file" id="fire_safety_inspection_checklist_file"
-                                            name="fire_safety_inspection_checklist_file" class="form-control"
-                                            accept=".pdf,.doc,.docx,.txt,.rtf"
-                                            onchange="previewPermitFile(event, 'checklist-preview')" style="display:none;"
-                                            <?php echo !$can_edit ? 'disabled' : ''; ?>>
-                                    <?php } ?>
+                                    </div><br>
+                                    <label for="fire_safety_inspection_checklist">
+                                        <?php echo empty($row['fire_safety_inspection_checklist']) ? 'Add New Fire Safety Inspection Checklist:' : 'Change Fire Safety Inspection Checklist:'; ?>
+                                    </label>
+                                    <label for="fire_safety_inspection_checklist_file" class="custom-file-upload">
+                                        <?php if (empty($row['fire_safety_inspection_checklist'])) { ?>
+                                            <i class="fa-solid fa-plus"></i>
+                                        <?php } else { ?>
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        <?php } ?>
+                                    </label>
+                                    <input type="file" id="fire_safety_inspection_checklist_file"
+                                        name="fire_safety_inspection_checklist_file" class="form-control"
+                                        accept=".pdf,.doc,.docx,.txt,.rtf"
+                                        onchange="previewPermitFile(event, 'checklist-preview')" <?php echo !$can_edit ? 'disabled' : ''; ?>>
+                                    <input type="hidden" name="delete_fire_safety_inspection_checklist"
+                                        id="delete_fire_safety_inspection_checklist" value="0">
                                 </div>
                             </div>
 
@@ -892,8 +932,12 @@ mysqli_close($conn);
                             <!-- Building Plans -->
                             <div id="building_plans_section" class="permit-doc-section" style="display:none;">
                                 <div class="form-group">
+                                    <div class="empty-message"
+                                        style="color: #b23c3c; background: #fff3f3; border: 1px solid #f5c2c7; border-radius: 6px; padding: 18px 0; margin: 18px 0 0 0; text-align: center; font-size: 1.08em; font-weight: 500; letter-spacing: 0.2px; display: <?php echo empty($row['building_plans']) ? 'block' : 'none'; ?>;">
+                                        No building plans uploaded yet.</div><br>
                                     <div class="narrative-report">
                                         <?php if (!empty($row['building_plans'])): ?>
+                                            <h4> Building Plans </h4><br>
                                             <a href="<?php echo htmlspecialchars($row['building_plans']); ?>"
                                                 target="_blank" class="btn-view"><i class="fa-solid fa-eye"></i></a>
                                             <a href="<?php echo htmlspecialchars($row['building_plans']); ?>" download
@@ -901,7 +945,6 @@ mysqli_close($conn);
                                             <button type="button" class="btn btn-delete"
                                                 onclick="deleteReportFile('building_plans', <?php echo $id; ?>)"><i
                                                     class="fa-solid fa-trash"></i></button>
-                                        <?php else: ?>
                                         <?php endif; ?>
                                         <div id="plans-preview" class="narrative-preview">
                                             <?php if (!empty($row['building_plans'])): ?>
@@ -918,23 +961,22 @@ mysqli_close($conn);
                                                 <?php } ?>
                                             <?php endif; ?>
                                         </div>
-                                    </div>
-                                    <?php if ($can_edit) { ?>
-                                        <label for="building_plans_file" class="custom-file-upload">
-                                            <?php if (empty($row['building_plans'])) { ?>
-                                                <i class="fa-solid fa-plus"></i>
-                                            <?php } else { ?>
-                                                <i class="fa-solid fa-pen-to-square"></i>
-                                            <?php } ?>
-                                        </label>
-                                        <label for="building_plans_file" style="font-weight: lighter;">
-                                            <?php echo empty($row['building_plans']) ? 'Add New' : 'Change'; ?> Building
-                                            Plans
-                                        </label>
-                                        <input type="file" id="building_plans_file" name="building_plans_file"
-                                            class="form-control" accept=".pdf,.doc,.docx,.txt,.rtf"
-                                            onchange="previewPermitFile(event, 'plans-preview')" style="display:none;" <?php echo !$can_edit ? 'disabled' : ''; ?>>
-                                    <?php } ?>
+                                    </div><br>
+                                    <label for="building_plans_file">
+                                        <?php echo empty($row['building_plans']) ? 'Add New Building Plans:' : 'Change Building Plans:'; ?>
+                                    </label>
+                                    <label for="building_plans_file" class="custom-file-upload">
+                                        <?php if (empty($row['building_plans'])) { ?>
+                                            <i class="fa-solid fa-plus"></i>
+                                        <?php } else { ?>
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        <?php } ?>
+                                    </label>
+                                    <input type="file" id="building_plans_file" name="building_plans_file"
+                                        class="form-control" accept=".pdf,.doc,.docx,.txt,.rtf"
+                                        onchange="previewPermitFile(event, 'plans-preview')" <?php echo !$can_edit ? 'disabled' : ''; ?>>
+                                    <input type="hidden" name="delete_building_plans" id="delete_building_plans"
+                                        value="0">
                                 </div>
                             </div>
 
@@ -942,8 +984,12 @@ mysqli_close($conn);
                             <div id="fire_safety_inspection_certificate_section" class="permit-doc-section"
                                 style="display:none;">
                                 <div class="form-group">
+                                    <div class="empty-message"
+                                        style="color: #b23c3c; background: #fff3f3; border: 1px solid #f5c2c7; border-radius: 6px; padding: 18px 0; margin: 18px 0 0 0; text-align: center; font-size: 1.08em; font-weight: 500; letter-spacing: 0.2px; display: <?php echo empty($row['fire_safety_inspection_certificate']) ? 'block' : 'none'; ?>;">
+                                        No fire safety inspection certificate uploaded yet.</div><br>
                                     <div class="narrative-report">
                                         <?php if (!empty($row['fire_safety_inspection_certificate'])): ?>
+                                            <h4> Fire Safety Inspection Certificate </h4><br>
                                             <a href="<?php echo htmlspecialchars($row['fire_safety_inspection_certificate']); ?>"
                                                 target="_blank" class="btn-view"><i class="fa-solid fa-eye"></i></a>
                                             <a href="<?php echo htmlspecialchars($row['fire_safety_inspection_certificate']); ?>"
@@ -951,7 +997,6 @@ mysqli_close($conn);
                                             <button type="button" class="btn btn-delete"
                                                 onclick="deleteReportFile('fire_safety_inspection_certificate', <?php echo $id; ?>)"><i
                                                     class="fa-solid fa-trash"></i></button>
-                                        <?php else: ?>
                                         <?php endif; ?>
                                         <div id="certificate-preview" class="narrative-preview">
                                             <?php if (!empty($row['fire_safety_inspection_certificate'])): ?>
@@ -970,39 +1015,41 @@ mysqli_close($conn);
                                             <?php endif; ?>
                                         </div>
                                     </div>
-                                    <?php if ($can_edit) { ?>
-                                        <label for="fire_safety_inspection_certificate_file" class="custom-file-upload">
-                                            <?php if (empty($row['fire_safety_inspection_certificate'])) { ?>
-                                                <i class="fa-solid fa-plus"></i>
-                                            <?php } else { ?>
-                                                <i class="fa-solid fa-pen-to-square"></i>
-                                            <?php } ?>
-                                        </label>
-                                        <label for="fire_safety_inspection_certificate_file" style="font-weight: lighter;">
-                                            <?php echo empty($row['fire_safety_inspection_certificate']) ? 'Add New' : 'Change'; ?>
-                                            Fire Safety Inspection Certificate
-                                        </label>
-                                        <input type="file" id="fire_safety_inspection_certificate_file"
-                                            name="fire_safety_inspection_certificate_file" class="form-control"
-                                            accept=".pdf,.doc,.docx,.txt,.rtf"
-                                            onchange="previewPermitFile(event, 'certificate-preview')" style="display:none;"
-                                            <?php echo !$can_edit ? 'disabled' : ''; ?>>
-                                    <?php } ?>
+                                    <label for="fire_safety_inspection_certificate_file">
+                                        <?php echo empty($row['fire_safety_inspection_certificate']) ? 'Add New Fire Safety Inspection Certificate:' : 'Change Fire Safety Inspection Certificate:'; ?>
+                                    </label>
+                                    <label for="fire_safety_inspection_certificate_file" class="custom-file-upload">
+                                        <?php if (empty($row['fire_safety_inspection_certificate'])) { ?>
+                                            <i class="fa-solid fa-plus"></i>
+                                        <?php } else { ?>
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        <?php } ?>
+                                    </label>
+                                    <input type="file" id="fire_safety_inspection_certificate_file"
+                                        name="fire_safety_inspection_certificate_file" class="form-control"
+                                        accept=".pdf,.doc,.docx,.txt,.rtf"
+                                        onchange="previewPermitFile(event, 'certificate-preview')" <?php echo !$can_edit ? 'disabled' : ''; ?>>
+                                    <input type="hidden" name="delete_fire_safety_inspection_certificate"
+                                        id="delete_fire_safety_inspection_certificate" value="0">
                                 </div>
-                            </div>
+                            </div><br>
 
                             <!-- Occupancy Permit -->
                             <div id="occupancy_permit_section" class="permit-doc-section" style="display:none;">
                                 <div class="form-group">
+                                    <div class="empty-message"
+                                        style="color: #b23c3c; background: #fff3f3; border: 1px solid #f5c2c7; border-radius: 6px; padding: 18px 0; margin: 18px 0 0 0; text-align: center; font-size: 1.08em; font-weight: 500; letter-spacing: 0.2px; display: <?php echo empty($row['occupancy_permit']) ? 'block' : 'none'; ?>;">
+                                        No occupancy permit uploaded yet.</div><br>
                                     <div class="narrative-report">
                                         <?php if (!empty($row['occupancy_permit'])): ?>
+                                            <h4> Occupancy Permit </h4><br>
                                             <a href="<?php echo htmlspecialchars($row['occupancy_permit']); ?>"
                                                 target="_blank" class="btn-view"><i class="fa-solid fa-eye"></i></a>
                                             <a href="<?php echo htmlspecialchars($row['occupancy_permit']); ?>" download
                                                 class="btn-download"><i class="fa-solid fa-download"></i></a>
                                             <button type="button" class="btn btn-delete"
                                                 onclick="deleteReportFile('occupancy_permit', <?php echo $id; ?>)"><i
-                                                    class="fa-solid fa-trash"></i></button> <?php else: ?>
+                                                    class="fa-solid fa-trash"></i></button>
                                         <?php endif; ?>
                                         <div id="occupancy-preview" class="narrative-preview">
                                             <?php if (!empty($row['occupancy_permit'])): ?>
@@ -1019,32 +1066,34 @@ mysqli_close($conn);
                                                 <?php } ?>
                                             <?php endif; ?>
                                         </div>
-                                    </div>
-                                    <?php if ($can_edit) { ?>
-                                        <label for="occupancy_permit_file" class="custom-file-upload">
-                                            <?php if (empty($row['occupancy_permit'])) { ?>
-                                                <i class="fa-solid fa-plus"></i>
-                                            <?php } else { ?>
-                                                <i class="fa-solid fa-pen-to-square"></i>
-                                            <?php } ?>
-                                        </label>
-                                        <label for="occupancy_permit_file" style="font-weight: lighter;">
-                                            <?php echo empty($row['occupancy_permit']) ? 'Add New' : 'Change'; ?> Occupancy
-                                            Permit
-                                        </label>
-                                        <input type="file" id="occupancy_permit_file" name="occupancy_permit_file"
-                                            class="form-control" accept=".pdf,.doc,.docx,.txt,.rtf"
-                                            onchange="previewPermitFile(event, 'occupancy-preview')" style="display:none;"
-                                            <?php echo !$can_edit ? 'disabled' : ''; ?>>
-                                    <?php } ?>
+                                    </div><br>
+                                    <label for="occupancy_permit">
+                                        <?php echo empty($row['occupancy_permit']) ? 'Add New Occupancy Permit:' : 'Change Occupancy Permit:'; ?>
+                                    </label>
+                                    <label for="occupancy_permit_file" class="custom-file-upload">
+                                        <?php if (empty($row['occupancy_permit'])) { ?>
+                                            <i class="fa-solid fa-plus"></i>
+                                        <?php } else { ?>
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        <?php } ?>
+                                    </label>
+                                    <input type="file" id="occupancy_permit_file" name="occupancy_permit_file"
+                                        class="form-control" accept=".pdf,.doc,.docx,.txt,.rtf"
+                                        onchange="previewPermitFile(event, 'occupancy-preview')" <?php echo !$can_edit ? 'disabled' : ''; ?>>
+                                    <input type="hidden" name="delete_occupancy_permit" id="delete_occupancy_permit"
+                                        value="0">
                                 </div>
                             </div>
 
                             <!-- Business Permit -->
                             <div id="business_permit_section" class="permit-doc-section" style="display:none;">
                                 <div class="form-group">
+                                    <div class="empty-message"
+                                        style="color: #b23c3c; background: #fff3f3; border: 1px solid #f5c2c7; border-radius: 6px; padding: 18px 0; margin: 18px 0 0 0; text-align: center; font-size: 1.08em; font-weight: 500; letter-spacing: 0.2px; display: <?php echo empty($row['business_permit']) ? 'block' : 'none'; ?>;">
+                                        No business permit uploaded yet.</div><br>
                                     <div class="narrative-report">
                                         <?php if (!empty($row['business_permit'])): ?>
+                                            <h4> Business Permit </h4><br>
                                             <a href="<?php echo htmlspecialchars($row['business_permit']); ?>"
                                                 target="_blank" class="btn-view"><i class="fa-solid fa-eye"></i></a>
                                             <a href="<?php echo htmlspecialchars($row['business_permit']); ?>" download
@@ -1052,7 +1101,6 @@ mysqli_close($conn);
                                             <button type="button" class="btn btn-delete"
                                                 onclick="deleteReportFile('business_permit', <?php echo $id; ?>)"><i
                                                     class="fa-solid fa-trash"></i></button>
-                                        <?php else: ?>
                                         <?php endif; ?>
                                         <div id="business-preview" class="narrative-preview">
                                             <?php if (!empty($row['business_permit'])): ?>
@@ -1069,24 +1117,22 @@ mysqli_close($conn);
                                                 <?php } ?>
                                             <?php endif; ?>
                                         </div>
-                                    </div>
-                                    <?php if ($can_edit) { ?>
-                                        <label for="business_permit_file" class="custom-file-upload">
-                                            <?php if (empty($row['business_permit'])) { ?>
-                                                <i class="fa-solid fa-plus"></i>
-                                            <?php } else { ?>
-                                                <i class="fa-solid fa-pen-to-square"></i>
-                                            <?php } ?>
-                                        </label>
-                                        <label for="business_permit_file" style="font-weight: lighter;">
-                                            <?php echo empty($row['business_permit']) ? 'Add New' : 'Change'; ?> Business
-                                            Permit
-                                        </label>
-                                        <input type="file" id="business_permit_file" name="business_permit_file"
-                                            class="form-control" accept=".pdf,.doc,.docx,.txt,.rtf"
-                                            onchange="previewPermitFile(event, 'business-preview')" style="display:none;"
-                                            <?php echo !$can_edit ? 'disabled' : ''; ?>>
-                                    <?php } ?>
+                                    </div><br>
+                                    <label for="business_permit">
+                                        <?php echo empty($row['business_permit']) ? 'Add New Business Permit:' : 'Change Business Permit:'; ?>
+                                    </label>
+                                    <label for="business_permit_file" class="custom-file-upload">
+                                        <?php if (empty($row['business_permit'])) { ?>
+                                            <i class="fa-solid fa-plus"></i>
+                                        <?php } else { ?>
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        <?php } ?>
+                                    </label>
+                                    <input type="file" id="business_permit_file" name="business_permit_file"
+                                        class="form-control" accept=".pdf,.doc,.docx,.txt,.rtf"
+                                        onchange="previewPermitFile(event, 'business-preview')" <?php echo !$can_edit ? 'disabled' : ''; ?>>
+                                    <input type="hidden" name="delete_business_permit" id="delete_business_permit"
+                                        value="0">
                                 </div>
                             </div>
                         </fieldset>
@@ -1196,7 +1242,7 @@ mysqli_close($conn);
                                 // Hide the modal after 2 seconds and redirect
                                 setTimeout(function () {
                                     document.getElementById('successModal').style.display = 'none';
-                                    window.location.href = 'fire_safety_inspection_certificate.php'; // Redirect after 2 seconds
+                                    window.location.href = 'my_fire_safety_reports.php'; // Redirect after 2 seconds
                                 }, 2000); // 2000 milliseconds = 2 seconds
                             }
 
@@ -1225,6 +1271,12 @@ mysqli_close($conn);
                             }
                             if (section && section.style.display === 'none') {
                                 section.style.display = 'block';
+                            }
+
+                            // Hide the empty message in this section
+                            const emptyMsg = section.querySelector('.empty-message');
+                            if (emptyMsg) {
+                                emptyMsg.style.display = 'none';
                             }
 
                             previewContainer.innerHTML = ''; // Clear previous preview
@@ -1269,14 +1321,71 @@ mysqli_close($conn);
                             document.getElementById('confirmDeleteBtn').onclick = function () {
                                 // Hide modal
                                 document.getElementById('confirmDeleteModal').style.display = 'none';
-                                // Redirect to PHP script to handle deletion (adjust the script name/path as needed)
-                                window.location.href = `delete_permit_file.php?id=${id}&field=${field}`;
+                                // Set the hidden delete field to 1
+                                var deleteInput = document.getElementById('delete_' + field);
+                                if (deleteInput) deleteInput.value = '1';
+                                // Hide the preview and narrative-report for this field
+                                var previewId = '';
+                                switch (field) {
+                                    case 'application_form': previewId = 'application-preview'; break;
+                                    case 'proof_of_ownership': previewId = 'ownership-preview'; break;
+                                    case 'building_plans': previewId = 'plans-preview'; break;
+                                    case 'fire_safety_inspection_checklist': previewId = 'checklist-preview'; break;
+                                    case 'fire_safety_inspection_certificate': previewId = 'certificate-preview'; break;
+                                    case 'occupancy_permit': previewId = 'occupancy-preview'; break;
+                                    case 'business_permit': previewId = 'business-preview'; break;
+                                }
+                                if (previewId) {
+                                    var preview = document.getElementById(previewId);
+                                    if (preview) preview.style.display = 'none';
+                                }
+                                // Hide the view, download, delete buttons, and h4 in the narrative-report section
+                                var narrativeSection = null;
+                                switch (field) {
+                                    case 'application_form': narrativeSection = document.querySelector('#application_form_section .narrative-report'); break;
+                                    case 'proof_of_ownership': narrativeSection = document.querySelector('#proof_of_ownership_section .narrative-report'); break;
+                                    case 'building_plans': narrativeSection = document.querySelector('#building_plans_section .narrative-report'); break;
+                                    case 'fire_safety_inspection_checklist': narrativeSection = document.querySelector('#fire_safety_inspection_checklist_section .narrative-report'); break;
+                                    case 'fire_safety_inspection_certificate': narrativeSection = document.querySelector('#fire_safety_inspection_certificate_section .narrative-report'); break;
+                                    case 'occupancy_permit': narrativeSection = document.querySelector('#occupancy_permit_section .narrative-report'); break;
+                                    case 'business_permit': narrativeSection = document.querySelector('#business_permit_section .narrative-report'); break;
+                                }
+                                if (narrativeSection) {
+                                    narrativeSection.querySelectorAll('.btn-view, .btn-download, .btn-delete, h4').forEach(el => {
+                                        el.style.display = 'none';
+                                    });
+                                }
+                                // Optionally hide the narrative-report div
+                                var btn = event ? event.target : null;
+                                if (btn) {
+                                    var narrative = btn.closest('.narrative-report');
+                                    if (narrative) narrative.style.display = 'none';
+                                }
+                                // Enable the save button if a file is marked for deletion
+                                enableSaveIfDeleteMarked();
                             };
 
                             // When cancel is clicked
                             document.getElementById('cancelDeleteBtn').onclick = function () {
                                 document.getElementById('confirmDeleteModal').style.display = 'none';
                             };
+                        }
+
+                        // Helper to enable save button if any delete hidden field is set
+                        function enableSaveIfDeleteMarked() {
+                            const form = document.querySelector('form');
+                            const saveBtn = document.querySelector('button[type="submit"].btn-primary');
+                            let deleteMarked = false;
+                            form.querySelectorAll('input[type="hidden"]').forEach(input => {
+                                if (input.name.startsWith('delete_') && input.value === '1') {
+                                    deleteMarked = true;
+                                }
+                            });
+                            if (deleteMarked) {
+                                saveBtn.disabled = false;
+                                saveBtn.style.opacity = "1";
+                                saveBtn.style.cursor = "pointer";
+                            }
                         }
 
                         document.addEventListener('DOMContentLoaded', function () {
@@ -1308,6 +1417,12 @@ mysqli_close($conn);
                                 // Check file inputs separately
                                 form.querySelectorAll('input[type="file"]').forEach(input => {
                                     if (input.files.length > 0) changed = true;
+                                });
+                                // Check if any delete hidden field is set
+                                form.querySelectorAll('input[type="hidden"]').forEach(input => {
+                                    if (input.name.startsWith('delete_') && input.value === '1') {
+                                        changed = true;
+                                    }
                                 });
                                 return changed;
                             }

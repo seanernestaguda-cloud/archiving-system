@@ -99,7 +99,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         return $existingPath;
     }
 
-    // Get existing file paths from $row
+    // Delayed deletion logic for each file
+    $delete_fields = [
+        'application_form',
+        'proof_of_ownership',
+        'building_plans',
+        'fire_safety_inspection_checklist',
+        'fire_safety_inspection_certificate',
+        'occupancy_permit',
+        'business_permit'
+    ];
+
+    foreach ($delete_fields as $field) {
+        $delete_key = 'delete_' . $field;
+        if (isset($_POST[$delete_key]) && $_POST[$delete_key] == '1') {
+            // Delete the file from the server
+            if (!empty($row[$field]) && file_exists($row[$field])) {
+                unlink($row[$field]);
+            }
+            // Set the field to empty for DB update
+            $row[$field] = '';
+        }
+    }
+
+    // Get existing file paths from $row, or new upload if provided
     $application_form = handleFileUpload('application_form_file', $row['application_form'], $uploadDir);
     $proof_of_ownership = handleFileUpload('proof_of_ownership_file', $row['proof_of_ownership'], $uploadDir);
     $building_plans = handleFileUpload('building_plans_file', $row['building_plans'], $uploadDir);
@@ -175,7 +198,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $stmt->close();
 }
-
 $sql_settings = "SELECT system_name FROM settings LIMIT 1";
 $result_settings = $conn->query($sql_settings);
 $system_name = 'BUREAU OF FIRE PROTECTION ARCHIVING SYSTEM';
@@ -307,7 +329,7 @@ mysqli_close($conn);
 
         .custom-file-upload {
             cursor: pointer;
-            font-size: 20px;
+            font-size: 14px;
             color: #444444;
             margin-right: 10px;
             vertical-align: middle;
@@ -319,7 +341,7 @@ mysqli_close($conn);
             border: 1px solid #003d73;
             background-color: #fff;
             padding: 20px;
-            border-radius: 30px;
+            border-radius: 10px;
         }
 
         .custom-file-upload i:hover {
@@ -521,6 +543,16 @@ mysqli_close($conn);
                     $can_edit = ($user_type === 'admin');
                     ?>
                     <form method="POST" action="view_permit.php?id=<?php echo $id; ?>" enctype="multipart/form-data">
+                        <!-- Hidden delete fields for delayed deletion -->
+                        <input type="hidden" name="delete_application_form" id="delete_application_form" value="0">
+                        <input type="hidden" name="delete_proof_of_ownership" id="delete_proof_of_ownership" value="0">
+                        <input type="hidden" name="delete_building_plans" id="delete_building_plans" value="0">
+                        <input type="hidden" name="delete_fire_safety_inspection_checklist"
+                            id="delete_fire_safety_inspection_checklist" value="0">
+                        <input type="hidden" name="delete_fire_safety_inspection_certificate"
+                            id="delete_fire_safety_inspection_certificate" value="0">
+                        <input type="hidden" name="delete_occupancy_permit" id="delete_occupancy_permit" value="0">
+                        <input type="hidden" name="delete_business_permit" id="delete_business_permit" value="0">
                         <h2><?php echo htmlspecialchars($row['permit_name']); ?></h2>
                         <fieldset>
                             <legend> Inspection Details </legend>
@@ -726,6 +758,9 @@ mysqli_close($conn);
                             <!-- Application Form -->
                             <div id="application_form_section" class="permit-doc-section" style="display:none;">
                                 <div class="form-group">
+                                    <div class="empty-message"
+                                        style="color: #b23c3c; background: #fff3f3; border: 1px solid #f5c2c7; border-radius: 6px; padding: 18px 0; margin: 18px 0 0 0; text-align: center; font-size: 1.08em; font-weight: 500; letter-spacing: 0.2px; display: <?php echo empty($row['application_form']) ? 'block' : 'none'; ?>;">
+                                        No application form uploaded yet.</div><br>
                                     <div class="narrative-report">
                                         <?php if (!empty($row['application_form'])): ?>
                                             <a href="<?php echo $row['application_form']; ?>" target="_blank"
@@ -772,6 +807,9 @@ mysqli_close($conn);
                             <!-- Proof of Ownership -->
                             <div id="proof_of_ownership_section" class="permit-doc-section" style="display:none;">
                                 <div class="form-group">
+                                    <div class="empty-message"
+                                        style="color: #b23c3c; background: #fff3f3; border: 1px solid #f5c2c7; border-radius: 6px; padding: 18px 0; margin: 18px 0 0 0; text-align: center; font-size: 1.08em; font-weight: 500; letter-spacing: 0.2px; display: <?php echo empty($row['proof_of_ownership']) ? 'block' : 'none'; ?>;">
+                                        No proof of ownership uploaded yet.</div><br>
                                     <div class="narrative-report">
                                         <?php if (!empty($row['proof_of_ownership'])): ?>
                                             <a href="<?php echo $row['proof_of_ownership']; ?>" target="_blank"
@@ -818,6 +856,9 @@ mysqli_close($conn);
                             <div id="fire_safety_inspection_checklist_section" class="permit-doc-section"
                                 style="display:none;">
                                 <div class="form-group">
+                                    <div class="empty-message"
+                                        style="color: #b23c3c; background: #fff3f3; border: 1px solid #f5c2c7; border-radius: 6px; padding: 18px 0; margin: 18px 0 0 0; text-align: center; font-size: 1.08em; font-weight: 500; letter-spacing: 0.2px; display: <?php echo empty($row['fire_safety_inspection_checklist']) ? 'block' : 'none'; ?>;">
+                                        No fire safety inspection checklist uploaded yet.</div><br>
                                     <div class="narrative-report">
                                         <?php if (!empty($row['fire_safety_inspection_checklist'])): ?>
                                             <a href="<?php echo $row['fire_safety_inspection_checklist']; ?>"
@@ -866,6 +907,9 @@ mysqli_close($conn);
                             <!-- Fire Safety Personnel -->
                             <div id="building_plans_section" class="permit-doc-section" style="display:none;">
                                 <div class="form-group">
+                                    <div class="empty-message"
+                                        style="color: #b23c3c; background: #fff3f3; border: 1px solid #f5c2c7; border-radius: 6px; padding: 18px 0; margin: 18px 0 0 0; text-align: center; font-size: 1.08em; font-weight: 500; letter-spacing: 0.2px; display: <?php echo empty($row['building_plans']) ? 'block' : 'none'; ?>;">
+                                        No building plans uploaded yet.</div><br>
                                     <div class="narrative-report">
                                         <?php if (!empty($row['building_plans'])): ?>
                                             <a href="<?php echo htmlspecialchars($row['building_plans']); ?>"
@@ -914,6 +958,9 @@ mysqli_close($conn);
                             <div id="fire_safety_inspection_certificate_section" class="permit-doc-section"
                                 style="display:none;">
                                 <div class="form-group">
+                                    <div class="empty-message"
+                                        style="color: #b23c3c; background: #fff3f3; border: 1px solid #f5c2c7; border-radius: 6px; padding: 18px 0; margin: 18px 0 0 0; text-align: center; font-size: 1.08em; font-weight: 500; letter-spacing: 0.2px; display: <?php echo empty($row['fire_safety_inspection_certificate']) ? 'block' : 'none'; ?>;">
+                                        No fire safety inspection certificate uploaded yet.</div><br>
                                     <div class="narrative-report">
                                         <?php if (!empty($row['fire_safety_inspection_certificate'])): ?>
                                             <a href="<?php echo htmlspecialchars($row['fire_safety_inspection_certificate']); ?>"
@@ -962,6 +1009,9 @@ mysqli_close($conn);
                             <!-- Occupancy Permit -->
                             <div id="occupancy_permit_section" class="permit-doc-section" style="display:none;">
                                 <div class="form-group">
+                                    <div class="empty-message"
+                                        style="color: #b23c3c; background: #fff3f3; border: 1px solid #f5c2c7; border-radius: 6px; padding: 18px 0; margin: 18px 0 0 0; text-align: center; font-size: 1.08em; font-weight: 500; letter-spacing: 0.2px; display: <?php echo empty($row['occupancy_permit']) ? 'block' : 'none'; ?>;">
+                                        No occupancy permit uploaded yet.</div><br>
                                     <div class="narrative-report">
                                         <?php if (!empty($row['occupancy_permit'])): ?>
                                             <a href="<?php echo htmlspecialchars($row['occupancy_permit']); ?>"
@@ -1007,6 +1057,9 @@ mysqli_close($conn);
                             <!-- Business Permit -->
                             <div id="business_permit_section" class="permit-doc-section" style="display:none;">
                                 <div class="form-group">
+                                    <div class="empty-message"
+                                        style="color: #b23c3c; background: #fff3f3; border: 1px solid #f5c2c7; border-radius: 6px; padding: 18px 0; margin: 18px 0 0 0; text-align: center; font-size: 1.08em; font-weight: 500; letter-spacing: 0.2px; display: <?php echo empty($row['business_permit']) ? 'block' : 'none'; ?>;">
+                                        No business permit uploaded yet.</div><br>
                                     <div class="narrative-report">
                                         <?php if (!empty($row['business_permit'])): ?>
                                             <a href="<?php echo htmlspecialchars($row['business_permit']); ?>"
@@ -1189,6 +1242,12 @@ mysqli_close($conn);
                             section.style.display = 'block';
                         }
 
+                        // Hide the empty message in this section
+                        const emptyMsg = section.querySelector('.empty-message');
+                        if (emptyMsg) {
+                            emptyMsg.style.display = 'none';
+                        }
+
                         previewContainer.innerHTML = ''; // Clear previous preview
 
                         const file = event.target.files[0];
@@ -1231,8 +1290,63 @@ mysqli_close($conn);
                         document.getElementById('confirmDeleteBtn').onclick = function () {
                             // Hide modal
                             document.getElementById('confirmDeleteModal').style.display = 'none';
-                            // Redirect to PHP script to handle deletion (adjust the script name/path as needed)
-                            window.location.href = `delete_permit_file.php?id=${id}&field=${field}`;
+                            // Hide the view, download, delete buttons, and h4 in the narrative-report section
+                            var narrativeSection = null;
+                            var previewId = '';
+                            switch (field) {
+                                case 'application_form':
+                                    narrativeSection = document.querySelector('#application_form_section .narrative-report');
+                                    previewId = 'application-preview';
+                                    break;
+                                case 'proof_of_ownership':
+                                    narrativeSection = document.querySelector('#proof_of_ownership_section .narrative-report');
+                                    previewId = 'ownership-preview';
+                                    break;
+                                case 'building_plans':
+                                    narrativeSection = document.querySelector('#building_plans_section .narrative-report');
+                                    previewId = 'building-plans-preview';
+                                    break;
+                                case 'fire_safety_inspection_checklist':
+                                    narrativeSection = document.querySelector('#fire_safety_inspection_checklist_section .narrative-report');
+                                    previewId = 'checklist-preview';
+                                    break;
+                                case 'fire_safety_inspection_certificate':
+                                    narrativeSection = document.querySelector('#fire_safety_inspection_certificate_section .narrative-report');
+                                    previewId = 'certificate-preview';
+                                    break;
+                                case 'occupancy_permit':
+                                    narrativeSection = document.querySelector('#occupancy_permit_section .narrative-report');
+                                    previewId = 'occupancy-preview';
+                                    break;
+                                case 'business_permit':
+                                    narrativeSection = document.querySelector('#business_permit_section .narrative-report');
+                                    previewId = 'business-preview';
+                                    break;
+                            }
+                            if (narrativeSection) {
+                                narrativeSection.querySelectorAll('.btn-view, .btn-download, .btn-delete, h4').forEach(el => {
+                                    el.style.display = 'none';
+                                });
+                            }
+                            // Hide the preview container as well
+                            if (previewId) {
+                                var previewEl = document.getElementById(previewId);
+                                if (previewEl) {
+                                    previewEl.style.display = 'none';
+                                }
+                            }
+                            // Set the hidden delete field to 1
+                            var deleteInput = document.getElementById('delete_' + field);
+                            if (deleteInput) {
+                                deleteInput.value = '1';
+                            }
+                            // Enable the Save button
+                            var saveBtn = document.querySelector('button[type="submit"].btn-primary');
+                            if (saveBtn) {
+                                saveBtn.disabled = false;
+                                saveBtn.style.opacity = "1";
+                                saveBtn.style.cursor = "pointer";
+                            }
                         };
 
                         // When cancel is clicked

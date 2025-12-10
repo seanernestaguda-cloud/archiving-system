@@ -348,6 +348,21 @@ mysqli_close($conn);
     background: #fff;
     box-shadow: 0 4px 8px rgba(0,0,0,0.08);
 }
+
+        .empty-message {
+    color: #b23c3c;
+    background: #fff3f3;
+    border: 1px solid #f5c2c7;
+    border-radius: 6px;
+    padding: 15px 0;
+    margin: 18px 0 0 0;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    display: block;
+}
+
     </style>
 </head>
 <body>
@@ -552,101 +567,89 @@ mysqli_close($conn);
 <fieldset>
     <legend>Photos of the Scene</legend>
     <div class="documents-section">
-
-        <!-- Photo Gallery -->
         <?php if ($report['documentation_photos']) { ?>
-        <section class="photo-gallery">
-            <h3>Photos of the Scene</h3>
-            <input type="hidden" id="existing_photos_input" name="existing_photos_input" value="<?php echo htmlspecialchars($report['documentation_photos']); ?>">
-           <div class="photo-grid">
-                <?php
-                $photos = explode(',', $report['documentation_photos']);
-                foreach ($photos as $index => $photo) {
-                    echo "<div class='photo-container' data-path='$photo'>";
-                    echo "<img src='$photo' alt='Documentation Photo' class='scene-photo'>";
-                    // Hidden input for each photo to keep track
-                    echo "<input type='hidden' name='existing_photos[]' value='$photo' class='existing-photo-input'>";
-                    // echo "<button type='button' class='delete-photo-btn' data-index='$index' data-path='$photo' title='Delete Photo'>X</button>";
-                    echo "</div>";
-                }
-                ?>
-            </div>
-        </section>
+            <section class="photo-gallery">
+                <h3>Photos of the Scene</h3>
+                <input type="hidden" id="existing_photos_input" name="existing_photos_input" value="<?php echo htmlspecialchars($report['documentation_photos']); ?>">
+                <div class="photo-grid">
+                    <?php
+                    $photos = explode(',', $report['documentation_photos']);
+                    foreach ($photos as $index => $photo) {
+                        echo "<div class='photo-container' data-path='$photo'>";
+                        echo "<img src='$photo' alt='Documentation Photo' class='scene-photo'>";
+                        echo "<input type='hidden' name='existing_photos[]' value='$photo' class='existing-photo-input'>";
+                        echo "</div>";
+                    }
+                    ?>
+                </div>
+            </section>
+        <?php } else { ?>
+            <span class="empty-message"><i class="fa-regular fa-image"></i> No photos available.</span>
         <?php } ?>
-
-        <!-- <div class="form-group">
-            <label for="documentation_photos" class="file-icon-label">
-                <i class="fa-solid fa-plus"></i>
-            </label>
-                <label for="documentation_photos" style = "font-weight: lighter;">Add New</label>
-            <input type="file" id="documentation_photos" name="documentation_photos[]" class="form-control" multiple accept="image/*" onchange="previewImages(event)" style="display:none;" <?php echo !$can_edit ? 'disabled' : ''; ?>>
-        </div> -->
-        <div id="image-previews" class="image-previews"></div>
-        </fieldset>
+    </div>
+    <div id="image-previews" class="image-previews"></div>
+    </fieldset>
         <br>
         <fieldset>
-        <legend> Required Attachments  </legend> 
-       
-   <h4>Required Attachments</h4>
-     <div class="form-group" style="margin-bottom: 0;">
- 
-    <div class="tab-container">
-        <button type="button" class="tab-btn" onclick="showTab('spot')">Spot Investigation Report</button>
-        <button type="button" class="tab-btn" onclick="showTab('progress')">Progress Investigation Report</button>
-        <button type="button" class="tab-btn" onclick="showTab('final')">Final Investigation Report</button>
-    </div>
-</div>
+        <legend> Required Attachments  </legend>
+        <h4>Required Attachments</h4>
+        <div class="form-group" style="margin-bottom: 0;">
+            <div class="tab-container">
+                <button type="button" class="tab-btn" onclick="showTab('spot')">Spot Investigation Report</button>
+                <button type="button" class="tab-btn" onclick="showTab('progress')">Progress Investigation Report</button>
+                <button type="button" class="tab-btn" onclick="showTab('final')">Final Investigation Report</button>
+            </div>
+        </div>
 
 <div id="spot_report_section" class="report-section" style="display:none;">
     <div class="form-group">
-    <?php if ($report['narrative_report']) { ?>
-        <div class="narrative-report">
-            <h3>Spot Investigation Report</h3>
-            <a href="<?php echo $report['narrative_report']; ?>" target="_blank" class = "btn-view"><i class="fa-solid fa-eye"></i></a>
-            <a href="<?php echo $report['narrative_report']; ?>" download class="btn-download"><i class="fa-solid fa-download"></i></a>
-            <!-- <button type="button" class="btn btn-delete" onclick="deleteReportFile('narrative_report', <?php echo $report_id; ?>)"><i class="fa-solid fa-trash"></i></button> -->
-            <div id="narrative-preview" class="narrative-preview">
-                <h4>Preview:</h4>
-                <?php 
-                $file_extension = pathinfo($report['narrative_report'], PATHINFO_EXTENSION);
-                if (strtolower($file_extension) === 'pdf') { ?>
-                    <iframe src="<?php echo $report['narrative_report']; ?>" width="220%" height="500px"></iframe>
-                <?php } else { ?>
-                    <p>Preview not available for this file type. <a href="<?php echo $report['narrative_report']; ?>" target="_blank">Download to view the report.</a></p>
-                <?php } ?>
+        <?php if ($report['narrative_report']) { ?>
+            <div class="narrative-report">
+                <h3>Spot Investigation Report</h3>
+                <a href="<?php echo $report['narrative_report']; ?>" target="_blank" class = "btn-view"><i class="fa-solid fa-eye"></i></a>
+                <a href="<?php echo $report['narrative_report']; ?>" download class="btn-download"><i class="fa-solid fa-download"></i></a>
+                <div id="narrative-preview" class="narrative-preview">
+                    <h4>Preview:</h4>
+                    <?php 
+                    $file_extension = pathinfo($report['narrative_report'], PATHINFO_EXTENSION);
+                    if (strtolower($file_extension) === 'pdf') { ?>
+                        <iframe src="<?php echo $report['narrative_report']; ?>" width="220%" height="500px"></iframe>
+                    <?php } else { ?>
+                        <p>Preview not available for this file type. <a href="<?php echo $report['narrative_report']; ?>" target="_blank">Download to view the report.</a></p>
+                    <?php } ?>
+                </div>
             </div>
-        </div>
-    <?php } ?>
-    <div id="narrative-preview"></div>
-    <!-- <label for="narrative_report">Change Spot Investigation Report:</label>
-    <label for="narrative_report" class="file-icon-label"><i class="fa-solid fa-pen-to-square"><span id="labelChange"></i></label>
-    <input type="file" id="narrative_report" name="narrative_report" class="form-control"
-    accept=".pdf,.doc,.docx,.txt,.rtf" onchange="previewReport(event, 'narrative-preview')" <?php echo !$can_edit ? 'disabled' : ''; ?>> -->
+        <?php } else { ?>
+            <span class="empty-message"><i class="fa-regular fa-file"></i> No Spot Investigation Report uploaded.</span>
+
+        <?php } ?>
+        <div id="narrative-preview"></div>
     </div>
    
 </div>
 <!-- Progress Report Section -->
 <div id="progress_report_section" class="report-section" style="display:none;">
     <div class="form-group">
-    <?php if ($report['progress_report']) { ?>
-        <div class="narrative-report">
-            <h3>Progress Report</h3>
- <a href="<?php echo $report['progress_report']; ?>" target="_blank" class = "btn-view"><i class="fa-solid fa-eye"></i></a>
-            <a href="<?php echo $report['progress_report']; ?>" download class="btn-download"><i class="fa-solid fa-download"></i></a>
-            <!-- <button type="button" class="btn btn-delete" onclick="deleteReportFile('progress_report', <?php echo $report_id; ?>)"><i class="fa-solid fa-trash"></i></button>            -->
-             <div id="progress-preview" class="narrative-preview">
-                <h4>Preview:</h4>
-                <?php 
-                $file_extension = pathinfo($report['progress_report'], PATHINFO_EXTENSION);
-                if (strtolower($file_extension) === 'pdf') { ?>
-                    <iframe src="<?php echo $report['progress_report']; ?>" width="220%" height="500px"></iframe>
-                <?php } else { ?>
-                    <p>Preview not available for this file type. <a href="<?php echo $report['progress_report']; ?>" target="_blank">Download to view the report.</a></p>
-                <?php } ?>
+        <?php if ($report['progress_report']) { ?>
+            <div class="narrative-report">
+                <h3>Progress Report</h3>
+                <a href="<?php echo $report['progress_report']; ?>" target="_blank" class = "btn-view"><i class="fa-solid fa-eye"></i></a>
+                <a href="<?php echo $report['progress_report']; ?>" download class="btn-download"><i class="fa-solid fa-download"></i></a>
+                <div id="progress-preview" class="narrative-preview">
+                    <h4>Preview:</h4>
+                    <?php 
+                    $file_extension = pathinfo($report['progress_report'], PATHINFO_EXTENSION);
+                    if (strtolower($file_extension) === 'pdf') { ?>
+                        <iframe src="<?php echo $report['progress_report']; ?>" width="220%" height="500px"></iframe>
+                    <?php } else { ?>
+                        <p>Preview not available for this file type. <a href="<?php echo $report['progress_report']; ?>" target="_blank">Download to view the report.</a></p>
+                    <?php } ?>
+                </div>
             </div>
-        </div>
-    <?php } ?>
-    <div id="progress-preview"></div>
+        <?php } else { ?>
+            <span class="empty-message"><i class="fa-regular fa-file"></i> No Progress Investigation Report uploaded.</span>
+        <?php } ?>
+        <div id="progress-preview"></div>
     <!-- <label for="progress_report">Change Progress Report:</label>
     <label for="progress_report" class="file-icon-label"><i class="fa-solid fa-pen-to-square"></i></label>
      <input type="file" id="progress_report" name="progress_report" class="form-control"
@@ -658,25 +661,26 @@ mysqli_close($conn);
 <!-- Final Report Section -->
 <div id="final_report_section" class="report-section" style="display:none;">
     <div class="form-group">
-    <?php if ($report['final_investigation_report']) { ?>
-        <div class="narrative-report">
-            <h3>Final Investigation Report</h3>
-            <a href="<?php echo $report['final_investigation_report']; ?>" target="_blank" class="btn-view"><i class="fa-solid fa-eye"></i></a>
-            <a href="<?php echo $report['final_investigation_report']; ?>" download class="btn-download"><i class="fa-solid fa-download"></i></a>
-            <!-- <button type="button" class="btn btn-delete" onclick="deleteReportFile('final_investigation_report', <?php echo $report_id; ?>)"><i class="fa-solid fa-trash"></i></button> -->
-            <div id="final-preview" class="narrative-preview">
-                <h4>Preview:</h4>
-                <?php 
-                $file_extension = pathinfo($report['final_investigation_report'], PATHINFO_EXTENSION);
-                if (strtolower($file_extension) === 'pdf') { ?>
-                    <iframe src="<?php echo $report['final_investigation_report']; ?>" width="220%" height="500px"></iframe>
-                <?php } else { ?>
-                    <p>Preview not available for this file type. <a href="<?php echo $report['final_investigation_report']; ?>" target="_blank">Download to view the report.</a></p>
-                <?php } ?>
+        <?php if ($report['final_investigation_report']) { ?>
+            <div class="narrative-report">
+                <h3>Final Investigation Report</h3>
+                <a href="<?php echo $report['final_investigation_report']; ?>" target="_blank" class="btn-view"><i class="fa-solid fa-eye"></i></a>
+                <a href="<?php echo $report['final_investigation_report']; ?>" download class="btn-download"><i class="fa-solid fa-download"></i></a>
+                <div id="final-preview" class="narrative-preview">
+                    <h4>Preview:</h4>
+                    <?php 
+                    $file_extension = pathinfo($report['final_investigation_report'], PATHINFO_EXTENSION);
+                    if (strtolower($file_extension) === 'pdf') { ?>
+                        <iframe src="<?php echo $report['final_investigation_report']; ?>" width="220%" height="500px"></iframe>
+                    <?php } else { ?>
+                        <p>Preview not available for this file type. <a href="<?php echo $report['final_investigation_report']; ?>" target="_blank">Download to view the report.</a></p>
+                    <?php } ?>
+                </div>
             </div>
-        </div>
-    <?php } ?>
-    <div id="final-preview"></div>
+        <?php } else { ?>
+            <span class="empty-message"><i class="fa-regular fa-file"></i> No Final Investigation Report uploaded.</span>
+        <?php } ?>
+        <div id="final-preview"></div>
      <!-- <label for="final_investigation_report">Change Final Investigation Report:</label>
     <label for="final_investigation_report" class="file-icon-label"><i class="fa-solid fa-pen-to-square"></i></label>
      <input type="file" id="final_investigation_report" name="final_investigation_report" class="form-control"

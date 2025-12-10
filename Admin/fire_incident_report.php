@@ -148,18 +148,28 @@ $allowed_sort_columns = ['report_id', 'report_title', 'created_at', 'fire_locati
 $sort_by = isset($_GET['sort_by']) && in_array($_GET['sort_by'], $allowed_sort_columns) ? $_GET['sort_by'] : 'report_id';
 $order_by = 'ASC';
 
-// --- Add filtering by month ---
-$where_clauses[] = "deleted_at IS NULL";
+// --- Filtering logic ---
+$where_clauses = ["deleted_at IS NULL"];
 $params = [];
 $param_types = '';
 
+// Monthly filter: ensure correct date range
 if (!empty($_GET['start_month'])) {
     $start = $_GET['start_month'] . '-01 00:00:00';
     $where_clauses[] = "incident_date >= ?";
     $params[] = $start;
     $param_types .= 's';
 }
+if (!empty($_GET['end_month'])) {
+    $end_month = $_GET['end_month'];
+    $last_day = date('t', strtotime($end_month . '-01'));
+    $end = $end_month . '-' . $last_day . ' 23:59:59';
+    $where_clauses[] = "incident_date <= ?";
+    $params[] = $end;
+    $param_types .= 's';
+}
 
+// Search filter
 if (!empty($_GET['search'])) {
     $search = '%' . $_GET['search'] . '%';
     $where_clauses[] = "(report_id LIKE ? OR report_title LIKE ? OR fire_location LIKE ? OR establishment LIKE ?)";
@@ -170,22 +180,11 @@ if (!empty($_GET['search'])) {
     $param_types .= 'ssss';
 }
 
-if (!empty($_GET['end_month'])) {
-    // Get last day of the month
-    $end_month = $_GET['end_month'];
-    $last_day = date('t', strtotime($end_month . '-01'));
-    $end = $end_month . '-' . $last_day . ' 23:59:59';
-    $where_clauses[] = "incident_date <= ?";
-    $params[] = $end;
-    $param_types .= 's';
-}
-
+// Build WHERE SQL
 $where_sql = '';
 if ($where_clauses) {
     $where_sql = 'WHERE ' . implode(' AND ', $where_clauses);
 }
-
-$username = $_SESSION['username'];
 $avatar = '../avatars/default_avatar.png';
 
 // Use prepared statement to prevent SQL injection
@@ -621,7 +620,8 @@ mysqli_close($conn);
                                     <a href="?sort_by=report_title" class="select-multi-btn"
                                         style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Title</a>
                                     <a href="?sort_by=created_at" class="select-multi-btn"
-                                        style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Date Created</a>
+                                        style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Date
+                                        Created</a>
                                     <a href="?sort_by=fire_location" class="select-multi-btn"
                                         style="width:100%; text-align:left; border-radius:0; text-decoration: none;">Location</a>
                                 </div>
@@ -649,16 +649,21 @@ mysqli_close($conn);
 
                             </div>
                             <form action="export_fire_reports.php" method="GET" style="display:inline;">
-                                <input type="hidden" name="search" value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
-                                <input type="hidden" name="start_month" value="<?php echo isset($_GET['start_month']) ? htmlspecialchars($_GET['start_month']) : ''; ?>">
-                                <input type="hidden" name="end_month" value="<?php echo isset($_GET['end_month']) ? htmlspecialchars($_GET['end_month']) : ''; ?>">
-                                <input type="hidden" name="sort_by" value="<?php echo isset($_GET['sort_by']) ? htmlspecialchars($_GET['sort_by']) : 'report_id'; ?>">
+                                <input type="hidden" name="search"
+                                    value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+                                <input type="hidden" name="start_month"
+                                    value="<?php echo isset($_GET['start_month']) ? htmlspecialchars($_GET['start_month']) : ''; ?>">
+                                <input type="hidden" name="end_month"
+                                    value="<?php echo isset($_GET['end_month']) ? htmlspecialchars($_GET['end_month']) : ''; ?>">
+                                <input type="hidden" name="sort_by"
+                                    value="<?php echo isset($_GET['sort_by']) ? htmlspecialchars($_GET['sort_by']) : 'report_id'; ?>">
                                 <button type="submit" class="select-multi-btn">
                                     <i class="fa-solid fa-file-excel" style="color: green;"></i>
                                     <label for="">.csv</label>
                                 </button>
                             </form>
-                            <button type="button" class="select-multi-btn" id="printReportsBtn" onclick="printReportsTable()" style="margin-left: 4px;">
+                            <button type="button" class="select-multi-btn" id="printReportsBtn"
+                                onclick="printReportsTable()" style="margin-left: 4px;">
                                 <i class="fa-solid fa-print" style="color: #003D73;"></i>
                                 <label for="">Print</label>
                             </button>
@@ -703,7 +708,7 @@ mysqli_close($conn);
                                 $any_row_shown = false;
                                 foreach ($reports as $row):
                                     $any_row_shown = true;
-                                ?>
+                                    ?>
                                     <tr id="report-row<?php echo $row['report_id']; ?>">
                                         <td class="select-checkbox-cell" style="display:none;">
                                             <input type="checkbox" class="select-item"
@@ -712,7 +717,7 @@ mysqli_close($conn);
                                         <td><?php echo htmlspecialchars($row['report_id']); ?></td>
                                         <td><?php echo htmlspecialchars($row['report_title']); ?></td>
                                         <td><?php echo htmlspecialchars($row['fire_location_combined']); ?></td>
-                                        <td><?php echo htmlspecialchars($row['created_at']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['incident_date']); ?></td>
                                         <td><?php echo htmlspecialchars($row['establishment']); ?></td>
                                         <td>
                                             <?php
@@ -790,25 +795,25 @@ mysqli_close($conn);
                             <div id="paginationContainer" class="pagination" style="margin: 20px 0; text-align: center;">
                                 <?php if ($page > 1): ?>
                                     <a href="?<?php
-                                                $params = $_GET;
-                                                $params['page'] = $page - 1;
-                                                echo http_build_query($params);
-                                                ?>" class="pagination-btn">&laquo; Prev</a>
+                                    $params = $_GET;
+                                    $params['page'] = $page - 1;
+                                    echo http_build_query($params);
+                                    ?>" class="pagination-btn">&laquo; Prev</a>
                                 <?php endif; ?>
                                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                     <a href="?<?php
-                                                $params = $_GET;
-                                                $params['page'] = $i;
-                                                echo http_build_query($params);
-                                                ?>" class="pagination-btn<?php if ($i == $page)
-                                                                                echo ' active'; ?>"><?php echo $i; ?></a>
+                                    $params = $_GET;
+                                    $params['page'] = $i;
+                                    echo http_build_query($params);
+                                    ?>" class="pagination-btn<?php if ($i == $page)
+                                        echo ' active'; ?>"><?php echo $i; ?></a>
                                 <?php endfor; ?>
                                 <?php if ($page < $total_pages): ?>
                                     <a href="?<?php
-                                                $params = $_GET;
-                                                $params['page'] = $page + 1;
-                                                echo http_build_query($params);
-                                                ?>" class="pagination-btn">Next &raquo;</a>
+                                    $params = $_GET;
+                                    $params['page'] = $page + 1;
+                                    echo http_build_query($params);
+                                    ?>" class="pagination-btn">Next &raquo;</a>
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>
@@ -865,7 +870,7 @@ mysqli_close($conn);
                 const toggles = document.querySelectorAll('.report-dropdown-toggle');
 
                 toggles.forEach(toggle => {
-                    toggle.addEventListener('click', function(event) {
+                    toggle.addEventListener('click', function (event) {
                         event.preventDefault();
                         const dropdown = this.closest('.report-dropdown');
                         dropdown.classList.toggle('show');
@@ -963,21 +968,21 @@ mysqli_close($conn);
 
             // Confirm delete handler for both single and multi delete
 
-            document.getElementById('confirmDeleteBtn').onclick = function() {
+            document.getElementById('confirmDeleteBtn').onclick = function () {
                 if (singleDeleteId) {
                     // Single delete
                     fetch('delete_report.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: 'report_id=' + encodeURIComponent(singleDeleteId)
-                        })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: 'report_id=' + encodeURIComponent(singleDeleteId)
+                    })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
                                 openSuccessModal();
-                                setTimeout(function() {
+                                setTimeout(function () {
                                     window.location.reload();
                                 }, 1200);
                             } else {
@@ -989,19 +994,19 @@ mysqli_close($conn);
                 } else if (selectedToDelete.length > 0) {
                     // Multi delete
                     fetch('delete_selected_reports.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                report_ids: selectedToDelete
-                            })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            report_ids: selectedToDelete
                         })
+                    })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
                                 openSuccessModal();
-                                setTimeout(function() {
+                                setTimeout(function () {
                                     window.location.reload();
                                 }, 1200);
                             } else {
@@ -1050,14 +1055,14 @@ mysqli_close($conn);
                 });
             }
 
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.get('start_month') || urlParams.get('end_month')) {
                     document.getElementById('monthFilterContainer').style.display = 'block';
                 }
             });
 
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const searchInput = document.querySelector('.search-input');
                 const reportsTableBody = document.getElementById('reportsTableBody');
                 const paginationContainer = document.getElementById('paginationContainer');
@@ -1065,14 +1070,14 @@ mysqli_close($conn);
 
                 if (searchInput && reportsTableBody) {
                     let searchTimeout;
-                    searchInput.addEventListener('input', function() {
+                    searchInput.addEventListener('input', function () {
                         clearTimeout(searchTimeout);
-                        searchTimeout = setTimeout(function() {
+                        searchTimeout = setTimeout(function () {
                             const searchValue = searchInput.value;
                             if (searchValue.trim() === '') {
                                 // If search is cleared, reload the page to show all data
                                 if (paginationContainer) paginationContainer.style.display = '';
-                                window.location.href = window.location.pathname + window.location.search.replace(/([&?])search=[^&]*(&|$)/, function(match, p1, p2) {
+                                window.location.href = window.location.pathname + window.location.search.replace(/([&?])search=[^&]*(&|$)/, function (match, p1, p2) {
                                     // Remove search param from query string
                                     if (p2) return p1;
                                     return '';
@@ -1085,7 +1090,7 @@ mysqli_close($conn);
                                 if (paginationContainer) paginationContainer.style.display = 'none';
                                 const xhr = new XMLHttpRequest();
                                 xhr.open('GET', 'fire_incident_report_ajax.php?search=' + encodeURIComponent(searchValue) + '&count=1', true);
-                                xhr.onload = function() {
+                                xhr.onload = function () {
                                     if (xhr.status === 200) {
                                         let response;
                                         try {
@@ -1111,7 +1116,7 @@ mysqli_close($conn);
                         }, 300);
                     });
                     // Prevent Enter key from submitting the form
-                    searchInput.addEventListener('keydown', function(e) {
+                    searchInput.addEventListener('keydown', function (e) {
                         if (e.key === 'Enter') {
                             e.preventDefault();
                         }
@@ -1119,26 +1124,26 @@ mysqli_close($conn);
                 }
             });
 
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 // Show Confirm Logout Modal
-                document.getElementById('logoutLink').addEventListener('click', function(e) {
+                document.getElementById('logoutLink').addEventListener('click', function (e) {
                     e.preventDefault();
                     document.getElementById('logoutModal').style.display = 'flex';
                     document.getElementById('profileDropdown').classList.remove('show'); // <-- Add this line
                 });
 
                 // Handle Confirm Logout
-                document.getElementById('confirmLogout').addEventListener('click', function() {
+                document.getElementById('confirmLogout').addEventListener('click', function () {
                     window.location.href = 'logout.php';
                 });
 
                 // Handle Cancel Logout
-                document.getElementById('cancelLogout').addEventListener('click', function() {
+                document.getElementById('cancelLogout').addEventListener('click', function () {
                     document.getElementById('logoutModal').style.display = 'none';
                 });
             });
 
-            window.onclick = function(event) {
+            window.onclick = function (event) {
                 // ...existing code...
                 const logoutModal = document.getElementById('logoutModal');
                 if (event.target === logoutModal) {

@@ -6,16 +6,48 @@ if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
+
+session_start();
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 $where_clauses = ["deleted_at IS NULL"];
-$where_clauses[] = "uploader = '" . mysqli_real_escape_string($conn, $username) . "'";
 
-$params = [];
-$param_types = '';
+// Only show reports uploaded by the current user
+$username = $_SESSION['username'];
+$where_clauses[] = "uploader = ?";
+$params = [$username];
+$param_types = 's';
+
+// Month filter
+if (!empty($_GET['start_month'])) {
+    $start = $_GET['start_month'] . '-01 00:00:00';
+    $where_clauses[] = "incident_date >= ?";
+    $params[] = $start;
+    $param_types .= 's';
+}
+if (!empty($_GET['end_month'])) {
+    $end_month = $_GET['end_month'];
+    $last_day = date('t', strtotime($end_month . '-01'));
+    $end = $end_month . '-' . $last_day . ' 23:59:59';
+    $where_clauses[] = "incident_date <= ?";
+    $params[] = $end;
+    $param_types .= 's';
+}
+
+// Search filter
+if (!empty($search)) {
+    $search_like = '%' . $search . '%';
+    $where_clauses[] = "(report_id LIKE ? OR report_title LIKE ? OR CONCAT(street, ', ', purok, ', ', fire_location, ', ', municipality) LIKE ? OR establishment LIKE ?)";
+    $params[] = $search_like;
+    $params[] = $search_like;
+    $params[] = $search_like;
+    $params[] = $search_like;
+    $param_types .= 'ssss';
+}
 
 // ...existing code for preparing and executing the query...
 
-$stmt = $conn->prepare("SELECT 
+
+$query = "SELECT 
     report_id, 
     report_title, 
     CONCAT(street, ', ', purok, ', ', fire_location, ', ', municipality) AS fire_location_combined, 
@@ -37,7 +69,8 @@ $stmt = $conn->prepare("SELECT
 FROM fire_incident_reports 
 " . ($where_clauses ? 'WHERE ' . implode(' AND ', $where_clauses) : '') . "
 ORDER BY incident_date DESC
-LIMIT 50");
+LIMIT 50";
+$stmt = $conn->prepare($query);
 if ($param_types) {
     $stmt->bind_param($param_types, ...$params);
 }
@@ -83,35 +116,8 @@ foreach ($reports as $row) {
     $status = $is_complete ? 'Complete' : 'In Progress';
     $fire_types_display = empty($row['fire_types']) ? 'Under Investigation' : $row['fire_types'];
 
-    $show_row = true;
-    if (!empty($search)) {
-        $search_lower = strtolower($search);
-        $match = false;
-        $search_fields = array(
-            $row['report_id'],
-            $row['report_title'],
-            $row['fire_location_combined'],
-            $row['incident_date'],
-            $row['establishment'],
-            $row['victims'],
-            $row['property_damage'],
-            $row['fire_types'],
-            $row['uploader'],
-            $row['department'],
-            $status,
-            $fire_types_display
-        );
-        foreach ($search_fields as $field) {
-            if (strpos(strtolower((string) $field), $search_lower) !== false) {
-                $match = true;
-                break;
-            }
-        }
-        if (!$match) {
-            $show_row = false;
-        }
-    }
-    if ($show_row) {
+    // Remove duplicate PHP-side search filtering, rely on SQL
+    {
         $filtered_count++;
         $rows_html .= '<tr id="report-row' . htmlspecialchars($row['report_id']) . '">';
         $rows_html .= '<td class="select-checkbox-cell" style="display:none;"><input type="checkbox" class="select-item" value="' . htmlspecialchars($row['report_id']) . '"></td>';

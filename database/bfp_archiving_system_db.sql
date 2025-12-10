@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 09, 2025 at 05:32 PM
+-- Generation Time: Dec 10, 2025 at 04:17 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -50,7 +50,54 @@ INSERT INTO `activity_logs` (`log_id`, `username`, `user_type`, `action`, `repor
 (5, 'admin123', NULL, 'create', 2, NULL, '2025-12-09 23:19:22', 'Created Fire Safety Inspection Report: Hardware Inspection 1'),
 (6, 'user', NULL, 'create', 4, NULL, '2025-12-09 23:30:57', 'Created report: Fire at Patadon West Farm'),
 (7, 'user', NULL, 'create', 3, NULL, '2025-12-09 23:34:59', 'Created Fire Safety Inspection Report: Hardware Inspection 1'),
-(8, 'user', NULL, 'update', 3, NULL, '2025-12-09 23:56:04', 'Updated Fire Safety Inspection Report: Hardware Inspection 1');
+(8, 'user', NULL, 'update', 3, NULL, '2025-12-09 23:56:04', 'Updated Fire Safety Inspection Report: Hardware Inspection 1'),
+(9, 'admin123', 'admin', 'create', 5, NULL, '2025-12-10 00:45:03', 'Created report: Fire at Patadon West Farm'),
+(10, 'admin123', NULL, 'create', 4, NULL, '2025-12-10 00:56:48', 'Created Fire Safety Inspection Report: Hardware Inspection 1'),
+(11, 'admin123', NULL, 'update', 4, NULL, '2025-12-10 07:20:09', 'Updated Fire Incident Report: Fire at Patadon West Farm'),
+(12, 'admin123', NULL, 'update', 4, NULL, '2025-12-10 08:40:09', 'Updated Fire Incident Report: Fire at Patadon West Farm'),
+(13, 'user', NULL, 'update', 3, NULL, '2025-12-10 09:14:48', 'Updated Fire Safety Inspection Report: Hardware Inspection 1'),
+(14, 'user', NULL, 'create', 5, NULL, '2025-12-10 09:17:33', 'Created Fire Safety Inspection Report: Mel & Jade'),
+(15, 'admin123', NULL, 'update', 4, NULL, '2025-12-10 09:31:06', 'Updated Fire Safety Inspection Report: Hardware Inspection 1'),
+(16, 'user', NULL, 'update', 4, NULL, '2025-12-10 09:37:19', 'Updated Fire Incident Report: Fire at Patadon West Farm'),
+(17, 'user', NULL, 'update', 4, NULL, '2025-12-10 09:38:21', 'Updated Fire Incident Report: Fire at Patadon West Farm'),
+(18, 'user', NULL, 'update', 4, NULL, '2025-12-10 09:38:54', 'Updated Fire Incident Report: Fire at Patadon West Farm'),
+(19, 'user', NULL, 'update', 4, NULL, '2025-12-10 09:39:37', 'Updated Fire Incident Report: Fire at Patadon West Farm'),
+(20, 'admin123', NULL, 'update', 3, NULL, '2025-12-10 09:40:30', 'Updated Fire Incident Report: Fire at Patadon West Farm'),
+(21, 'user', NULL, 'update', 4, NULL, '2025-12-10 09:42:20', 'Updated Fire Incident Report: Fire at Patadon West Farm'),
+(22, 'user', NULL, 'create', 6, NULL, '2025-12-10 09:44:47', 'Created Fire Safety Inspection Report: Hardware Inspection 1'),
+(23, 'user', NULL, 'update', 4, NULL, '2025-12-10 09:45:10', 'Updated Fire Incident Report: Fire at Patadon West Farm'),
+(24, 'admin123', NULL, 'update', 4, NULL, '2025-12-10 09:46:25', 'Updated Fire Safety Inspection Report: Hardware Inspection 1'),
+(25, 'admin123', NULL, 'update', 1, NULL, '2025-12-10 09:51:13', 'Updated Fire Safety Inspection Report: Mel & Jade'),
+(26, 'admin123', NULL, 'update', 1, NULL, '2025-12-10 09:51:55', 'Updated Fire Safety Inspection Report: Mel & Jade'),
+(27, 'admin123', NULL, 'update', 2, NULL, '2025-12-10 10:03:19', 'Updated Fire Safety Inspection Report: Hardware Inspection 1'),
+(28, 'admin123', NULL, 'update', 2, NULL, '2025-12-10 10:05:26', 'Updated Fire Safety Inspection Report: Hardware Inspection 1'),
+(29, 'admin123', NULL, 'update', 2, NULL, '2025-12-10 10:09:52', 'Updated Fire Safety Inspection Report: Hardware Inspection 1'),
+(30, 'admin123', NULL, 'update', 2, NULL, '2025-12-10 10:10:03', 'Updated Fire Safety Inspection Report: Hardware Inspection 1'),
+(31, 'user', NULL, 'update', 5, NULL, '2025-12-10 10:12:08', 'Updated Fire Safety Inspection Report: Mel & Jade'),
+(32, 'admin123', NULL, 'download', 1, NULL, '2025-12-10 10:33:37', 'Downloaded: Fire at Patadon West Farm'),
+(33, 'admin123', NULL, 'delete', 1, NULL, '2025-12-10 10:34:54', 'Delete Report: Fire at Patadon West Farm'),
+(34, 'user', NULL, 'update', 5, NULL, '2025-12-10 10:38:39', 'Updated Fire Safety Inspection Report: Mel & Jade'),
+(35, 'user', NULL, 'update', 5, NULL, '2025-12-10 10:39:58', 'Updated Fire Safety Inspection Report: Mel & Jade'),
+(36, 'user', NULL, 'download', 4, NULL, '2025-12-10 10:41:40', 'Downloaded: Fire at Patadon West Farm'),
+(37, 'user', NULL, 'download', 4, NULL, '2025-12-10 10:41:53', 'Downloaded: Fire at Patadon West Farm'),
+(38, 'admin123', NULL, 'download', 2, NULL, '2025-12-10 10:42:13', 'Downloaded: Fire at Patadon West Farm'),
+(39, 'admin123', NULL, 'download', 3, NULL, '2025-12-10 10:42:14', 'Downloaded: Fire at Patadon West Farm'),
+(40, 'admin123', NULL, 'download', 5, NULL, '2025-12-10 10:42:14', 'Downloaded: Fire at Patadon West Farm'),
+(41, 'admin123', NULL, 'delete', 2, NULL, '2025-12-10 10:42:29', 'Delete Report: Fire at Patadon West Farm'),
+(42, 'admin123', NULL, 'delete', 3, NULL, '2025-12-10 10:42:29', 'Delete Report: Fire at Patadon West Farm'),
+(43, 'admin123', NULL, 'delete', 5, NULL, '2025-12-10 10:42:29', 'Delete Report: Fire at Patadon West Farm'),
+(44, 'admin123', 'admin', 'restore', 3, NULL, '2025-12-10 10:42:39', 'Restored Fire Incident Report: Fire at Patadon West Farm'),
+(45, 'admin123', 'admin', 'restore', 5, NULL, '2025-12-10 10:42:39', 'Restored Fire Incident Report: Fire at Patadon West Farm'),
+(46, 'admin123', 'admin', 'restore', 2, NULL, '2025-12-10 10:42:39', 'Restored Fire Incident Report: Fire at Patadon West Farm'),
+(47, 'admin123', 'admin', 'restore', 1, NULL, '2025-12-10 10:42:39', 'Restored Fire Incident Report: Fire at Patadon West Farm'),
+(48, 'admin123', NULL, 'delete', 1, NULL, '2025-12-10 10:43:34', 'Deleted Fire Safety Inspection Report: Mel & Jade'),
+(49, 'admin123', NULL, 'delete', 2, NULL, '2025-12-10 10:43:34', 'Deleted Fire Safety Inspection Report: Hardware Inspection 1'),
+(50, 'admin123', NULL, 'delete', 4, NULL, '2025-12-10 10:43:34', 'Deleted Fire Safety Inspection Report: Hardware Inspection 1'),
+(51, 'admin123', 'admin', 'restore', NULL, 4, '2025-12-10 10:43:54', 'Restored Fire Inspection Report: Hardware Inspection 1'),
+(52, 'admin123', 'admin', 'restore', NULL, 1, '2025-12-10 10:43:54', 'Restored Fire Inspection Report: Mel & Jade'),
+(53, 'admin123', 'admin', 'restore', NULL, 2, '2025-12-10 10:43:54', 'Restored Fire Inspection Report: Hardware Inspection 1'),
+(54, 'user', NULL, 'create', 6, NULL, '2025-12-10 10:46:34', 'Created report: Fire at Matalam'),
+(55, 'admin123', 'admin', 'create', 7, NULL, '2025-12-10 11:02:23', 'Created report: Fire at Patadon West Farm');
 
 -- --------------------------------------------------------
 
@@ -186,8 +233,11 @@ CREATE TABLE `fire_incident_reports` (
 INSERT INTO `fire_incident_reports` (`report_id`, `report_title`, `fire_location`, `street`, `purok`, `municipality`, `incident_date`, `establishment`, `victims`, `firefighters`, `property_damage`, `fire_types`, `uploader`, `department`, `caller_name`, `responding_team`, `arrival_time`, `fireout_time`, `alarm_status`, `occupancy_type`, `documentation_photos`, `narrative_report`, `progress_report`, `final_investigation_report`, `deleted`, `deleted_at`, `created_at`) VALUES
 (1, 'Fire at Patadon West Farm', 'Patadon West', 'Matalam Hardware', 'Purok 4', 'Matalam', '2025-12-09 22:55:00', 'Warehouse', '', '', '1,000,000', '', 'admin123', 'Administrative', 'Carlos Dizon', 'Team A', '22:56', '22:56', '1st Alarm', 'Residential', '', '', '', '', 0, NULL, '2025-12-09 22:56:15'),
 (2, 'Fire at Patadon West Farm', 'Patadon West', 'Matalam Hardware', 'Purok 4', 'Matalam', '2025-10-10 23:13:00', 'Warehouse', '', '', '1,000,000', '', 'admin123', 'Administrative', 'Carlos Dizon', 'Team A', '23:13', '23:13', '1st Alarm', 'Residential', '../uploads/1765293311_fire 1 - Copy.jpg,../uploads/1765293311_fire 1.jpg,../uploads/1765293311_fire 2 - Copy.jpg,../uploads/1765293311_fire 2.jpg,../uploads/1765293311_fire3 - Copy.jpg,../uploads/1765293311_fire3.jpg', '../uploads/1765293311_Spot Investigation Report Sample.pdf', '../uploads/1765293311_progress_Progress Investigation Report.pdf', '../uploads/1765293311_final_Final Investigation Report.pdf', 0, NULL, '2025-12-09 23:15:11'),
-(3, 'Fire at Patadon West Farm', 'Patadon West', 'Matalam Hardware', 'Purok 4', 'Matalam', '2001-09-11 15:00:00', 'Warehouse', '', '', '1,000,000', 'Airplane crash', 'admin123', 'Administrative', 'Carlos Dizon', 'Team A', '15:15', '18:50', '1st Alarm', 'Residential', '../uploads/1765293433_fire 1 - Copy.jpg,../uploads/1765293433_fire 1.jpg,../uploads/1765293433_fire 2 - Copy.jpg,../uploads/1765293433_fire 2.jpg,../uploads/1765293433_fire3 - Copy.jpg,../uploads/1765293433_fire3.jpg', '../uploads/1765293433_Spot Investigation Report Sample.pdf', '../uploads/1765293433_progress_Progress Investigation Report.pdf', '../uploads/1765293433_final_Final Investigation Report.pdf', 0, NULL, '2025-12-09 23:17:13'),
-(4, 'Fire at Patadon West Farm', 'Patadon West', 'Matalam Hardware', 'Purok 4', 'Matalam', '2025-08-19 23:25:00', 'Warehouse', '', '', '1,000,000', 'Pyrotechnics', 'user', 'Operation', 'Carlos Dizon', 'Team A', '23:25', '12:25', '1st Alarm', 'Residential', '', '', '', '', 0, NULL, '2025-12-09 23:30:57');
+(3, 'Fire at Patadon West Farm', 'Patadon West', 'Matalam Hardware', 'Purok 4', 'Matalam', '2001-09-11 15:00:00', 'Warehouse', '', '', '1,000,000', 'Airplane crash', 'admin123', 'Administrative', 'Carlos Dizon', 'Team A', '15:15', '18:50', '1st Alarm', 'Residential', '../uploads/1765293433_fire 1 - Copy.jpg,../uploads/1765293433_fire 1.jpg,../uploads/1765293433_fire 2 - Copy.jpg,../uploads/1765293433_fire 2.jpg,../uploads/1765293433_fire3.jpg', '../uploads/1765293433_Spot Investigation Report Sample.pdf', '../uploads/1765293433_progress_Progress Investigation Report.pdf', '../uploads/1765293433_final_Final Investigation Report.pdf', 0, NULL, '2025-12-09 23:17:13'),
+(4, 'Fire at Patadon West Farm', 'Patadon West', 'Matalam Hardware', 'Purok 4', 'Matalam', '2025-08-19 23:25:00', 'Warehouse', '', '', '1,000,000', 'Pyrotechnics', 'user', 'Operation', 'Carlos Dizon', 'Team A', '23:25', '12:25', '1st Alarm', 'Residential', '../uploads/1765330701_fire 1 - Copy.jpg', '../uploads/1765322409_Spot Investigation Report Sample.pdf', '../uploads/1765327209_Progress Investigation Report.pdf', '../uploads/1765330639_Final Investigation Report.pdf', 0, NULL, '2025-12-09 23:30:57'),
+(5, 'Fire at Patadon West Farm', 'Patadon West', 'Matalam Hardware', 'Purok 4', 'Matalam', '2025-08-10 00:44:00', 'Warehouse', '', '', '1,000,000', 'Chemicals/LPG leaking', 'admin123', 'Administrative', 'Carlos Dizon', 'Team A', '00:44', '02:44', '2nd Alarm', 'Residential', '', '', '', '', 0, NULL, '2025-12-10 00:45:03'),
+(6, 'Fire at Matalam', 'Arakan', 'quhduiqhuwih', 'uiqhduiqhwdui', 'qiuhdiuqhidh', '2024-03-10 10:46:00', 'qhduohquwh', '', '', '1,000,000', 'Bomb explosion', 'user', 'Operation', 'Sean Ernest Aguda', 'qiipe1ue', '10:45', '10:46', '1st Alarm', 'Residential', '', '', '', '', 0, NULL, '2025-12-10 10:46:34'),
+(7, 'Fire at Patadon West Farm', 'Patadon West', 'Matalam Hardware', 'Purok 4', 'Matalam', '2025-12-10 11:02:00', 'Warehouse', '', '', '1,000,000', 'Bomb explosion', 'admin123', 'Administrative', 'Carlos Dizon', 'Team A', '11:02', '11:02', '1st Alarm', 'Residential', '', '', '', '', 0, NULL, '2025-12-10 11:02:23');
 
 -- --------------------------------------------------------
 
@@ -241,9 +291,12 @@ CREATE TABLE `fire_safety_inspection_certificate` (
 --
 
 INSERT INTO `fire_safety_inspection_certificate` (`id`, `permit_name`, `inspection_establishment`, `owner`, `inspection_address`, `inspection_date`, `establishment_type`, `inspection_purpose`, `fire_alarms`, `fire_extinguishers`, `emergency_exits`, `sprinkler_systems`, `fire_drills`, `exit_signs`, `electrical_wiring`, `emergency_evacuations`, `inspected_by`, `contact_person`, `contact_number`, `number_of_occupants`, `nature_of_business`, `number_of_floors`, `floor_area`, `classification_of_hazards`, `building_construction`, `possible_problems`, `hazardous_materials`, `application_form`, `proof_of_ownership`, `building_plans`, `fire_safety_inspection_certificate`, `fire_safety_inspection_checklist`, `occupancy_permit`, `business_permit`, `deleted_at`, `uploader`, `department`, `created_at`) VALUES
-(1, 'Mel & Jade', 'Warehouse', 'Ana Lopez', 'Warehouse', '2025-12-09', 'healthcare', 'routine', 0, 0, 0, 0, 0, 0, 0, 0, 'Mark Villanueva', 'Carlos Dizon', '5555555', 2, 'None', 2, '750 sqm', 'Class_A', 'concrete', 'None', 'Wood', '../uploads/20251209160556_Application Form (BFP).pdf', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'admin123', 'Administrative', '2025-12-09 23:05:56'),
-(2, 'Hardware Inspection 1', 'Warehouse', 'Ana Lopez', 'Warehouse', '2025-12-09', 'commercial', 'compliance', 0, 0, 0, 0, 0, 0, 0, 0, 'Mark Villanueva', 'Carlos Dizon', '5555555', 2, 'None', 2, '750 sqm', 'Class_A', 'concrete', 'Narrow Road\r\nToo Crowded', 'Paper\r\nPlastic\r\nWood', '../uploads/20251209161922_Application Form (BFP).pdf', '../uploads/20251209161922_Proof of Ownership.pdf', '../uploads/20251209161922_Building Plans.pdf', '../uploads/20251209161922_FSIC-Sample.pdf', '../uploads/20251209161922_Fire-Safety-Inspection-Checklist.pdf', '../uploads/20251209161922_FSIC-Sample.pdf', '../uploads/20251209161922_Tax Assessment.pdf', NULL, 'admin123', 'Administrative', '2025-12-09 23:19:22'),
-(3, 'Hardware Inspection 1', 'Warehouse', 'Ana Lopez', 'Warehouse', '2025-12-09', 'industrial', 'routine', 0, 0, 0, 0, 0, 0, 0, 0, 'Mark Villanueva', 'Carlos Dizon', '5555555', 2, 'None', 2, '750 sqm', 'Class_A', 'concrete', 'Too Narrow, Too Crowded', 'Plastic, wood, paper', '../uploads/69384693ef687_Application Form (BFP).pdf', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'user', 'Operation', '2025-12-09 23:34:59');
+(1, 'Mel & Jade', 'Warehouse', 'Ana Lopez', 'Warehouse', '2025-12-09', 'residential', 'routine', 0, 0, 0, 0, 0, 0, 0, 0, 'Mark Villanueva', 'Carlos Dizon', '5555555', 2, 'None', 2, '750 sqm', 'Class_A', 'concrete', 'None', 'Wood', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'admin123', 'Administrative', '2025-12-09 23:05:56'),
+(2, 'Hardware Inspection 1', 'Warehouse', 'Ana Lopez', 'Warehouse', '2025-12-09', 'commercial', 'compliance', 0, 0, 0, 0, 0, 0, 0, 0, 'Mark Villanueva', 'Carlos Dizon', '5555555', 2, 'None', 2, '750 sqm', 'Class_A', 'concrete', 'Narrow Road\r\nToo Crowded', 'Paper\r\nPlastic\r\nWood', '../uploads/6938d67b95878_Application Form (BFP).pdf', '../uploads/20251209161922_Proof of Ownership.pdf', '../uploads/20251209161922_Building Plans.pdf', '../uploads/20251209161922_FSIC-Sample.pdf', '../uploads/20251209161922_Fire-Safety-Inspection-Checklist.pdf', '../uploads/20251209161922_FSIC-Sample.pdf', '../uploads/20251209161922_Tax Assessment.pdf', NULL, 'admin123', 'Administrative', '2025-12-09 23:19:22'),
+(3, 'Hardware Inspection 1', 'Warehouse', 'Ana Lopez', 'Warehouse', '2025-12-09', 'industrial', 'routine', 0, 0, 0, 0, 0, 0, 0, 0, 'Mark Villanueva', 'Carlos Dizon', '5555555', 2, 'None', 2, '750 sqm', 'Class_A', 'concrete', 'Too Narrow, Too Crowded', 'Plastic, wood, paper', NULL, '../uploads/6938c9885ddeb_Proof of Ownership.pdf', '../uploads/6938c9885e62f_Building Plans.pdf', '../uploads/6938c9885ef19_FSIC-Sample.pdf', '../uploads/6938c9885ead7_Fire-Safety-Inspection-Checklist.pdf', '../uploads/6938c9885f2d9_FSIC-Sample.pdf', '../uploads/6938c9885f72c_Tax Assessment.pdf', NULL, 'user', 'Operation', '2025-12-09 23:34:59'),
+(4, 'Hardware Inspection 1', 'Warehouse', 'Ana Lopez', 'Warehouse', '2025-12-09', 'residential', 'routine', 0, 0, 0, 0, 0, 0, 0, 0, 'Mark Villanueva', 'Carlos Dizon', '5555555', 2, 'None', 2, '750 sqm', 'Class_A', 'concrete', 'none', 'none', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'admin123', 'Administrative', '2025-12-10 00:56:48'),
+(5, 'Mel & Jade', 'Matalam Hardware', 'Ana Lopez', '213123', '2025-12-10', 'residential', 'compliance', 0, 0, 0, 0, 0, 0, 0, 0, 'Mark Villanueva', 'Carlos Dizon', '5555555', 2, 'none', 2, '750 sqm', 'Class_A', 'concrete', 'None', 'Wood', '../uploads/6938d6f823894_Application Form (BFP).pdf', '../uploads/6938dd2f5c115_Proof of Ownership.pdf', '../uploads/6938dd7eb500a_Building Plans.pdf', '../uploads/6938dd7eb5780_FSIC-Sample.pdf', '../uploads/6938dd7eb53ec_Fire-Safety-Inspection-Checklist.pdf', '../uploads/6938dd7eb5b34_FSIC-Sample.pdf', '../uploads/6938dd7eb5e94_FSIC-Sample.pdf', NULL, 'user', 'Operation', '2025-12-10 09:17:33'),
+(6, 'Hardware Inspection 1', 'Matalam Hardware', 'Sean Ernest Aguda', 'Matalam Hardware', '2025-01-01', 'residential', 'compliance', 0, 0, 0, 0, 0, 0, 0, 0, 'Mark Villanueva', 'Sean Ernest Aguda', '09777461096', 1, 'none', 2, '21312', 'Class_A', 'concrete', 'none', 'none', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'user', 'Operation', '2025-12-10 09:44:47');
 
 -- --------------------------------------------------------
 
@@ -426,7 +479,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `activity_logs`
 --
 ALTER TABLE `activity_logs`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT for table `admins`
@@ -450,13 +503,13 @@ ALTER TABLE `departments`
 -- AUTO_INCREMENT for table `fire_incident_reports`
 --
 ALTER TABLE `fire_incident_reports`
-  MODIFY `report_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `report_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `fire_safety_inspection_certificate`
 --
 ALTER TABLE `fire_safety_inspection_certificate`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `fire_types`

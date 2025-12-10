@@ -604,7 +604,8 @@ mysqli_close($conn);
                                     <a href="?sort_by=report_title" class="select-multi-btn"
                                         style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Title</a>
                                     <a href="?sort_by=created_at" class="select-multi-btn"
-                                        style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Date Created</a>
+                                        style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Date
+                                        Created</a>
                                     <a href="?sort_by=fire_location" class="select-multi-btn"
                                         style="width:100%; text-align:left; border-radius:0; text-decoration: none;">Location</a>
                                 </div>
@@ -697,7 +698,7 @@ mysqli_close($conn);
                                         <td><?php echo htmlspecialchars($row['report_id']); ?></td>
                                         <td><?php echo htmlspecialchars($row['report_title']); ?></td>
                                         <td><?php echo htmlspecialchars($row['fire_location_combined']); ?></td>
-                                        <td><?php echo htmlspecialchars($row['created_at']); ?></td>
+                                        <td><?php echo htmlspecialchars($row['incident_date']); ?></td>
                                         <td><?php echo htmlspecialchars($row['establishment']); ?></td>
                                         <td>
                                             <?php
@@ -770,25 +771,25 @@ mysqli_close($conn);
                         <div id="paginationContainer" class="pagination" style="margin: 20px 0; text-align: center;">
                             <?php if ($page > 1): ?>
                                 <a href="?<?php
-                                            $params = $_GET;
-                                            $params['page'] = $page - 1;
-                                            echo http_build_query($params);
-                                            ?>" class="pagination-btn">&laquo; Prev</a>
+                                $params = $_GET;
+                                $params['page'] = $page - 1;
+                                echo http_build_query($params);
+                                ?>" class="pagination-btn">&laquo; Prev</a>
                             <?php endif; ?>
                             <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                 <a href="?<?php
-                                            $params = $_GET;
-                                            $params['page'] = $i;
-                                            echo http_build_query($params);
-                                            ?>" class="pagination-btn<?php if ($i == $page)
-                                                                            echo ' active'; ?>"><?php echo $i; ?></a>
+                                $params = $_GET;
+                                $params['page'] = $i;
+                                echo http_build_query($params);
+                                ?>" class="pagination-btn<?php if ($i == $page)
+                                    echo ' active'; ?>"><?php echo $i; ?></a>
                             <?php endfor; ?>
                             <?php if ($page < $total_pages): ?>
                                 <a href="?<?php
-                                            $params = $_GET;
-                                            $params['page'] = $page + 1;
-                                            echo http_build_query($params);
-                                            ?>" class="pagination-btn">Next &raquo;</a>
+                                $params = $_GET;
+                                $params['page'] = $page + 1;
+                                echo http_build_query($params);
+                                ?>" class="pagination-btn">Next &raquo;</a>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
@@ -846,7 +847,7 @@ mysqli_close($conn);
                 // Print Table Button functionality
                 const printBtn = document.getElementById('printTableBtn');
                 if (printBtn) {
-                    printBtn.addEventListener('click', function() {
+                    printBtn.addEventListener('click', function () {
                         const table = document.querySelector('.archive-table');
                         if (!table) return;
                         // Clone table to avoid modifying the original
@@ -949,16 +950,16 @@ mysqli_close($conn);
             }
 
             // Confirm delete handler for both single and multi delete
-            document.getElementById('confirmDeleteBtn').onclick = function() {
+            document.getElementById('confirmDeleteBtn').onclick = function () {
                 if (singleDeleteId) {
                     // Single delete
                     fetch('delete_report.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: 'report_id=' + encodeURIComponent(singleDeleteId)
-                        })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: 'report_id=' + encodeURIComponent(singleDeleteId)
+                    })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
@@ -974,14 +975,14 @@ mysqli_close($conn);
                 } else if (selectedToDelete.length > 0) {
                     // Multi delete
                     fetch('delete_selected_reports.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                report_ids: selectedToDelete
-                            })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            report_ids: selectedToDelete
                         })
+                    })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
@@ -1036,14 +1037,14 @@ mysqli_close($conn);
                 });
             }
 
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.get('start_month') || urlParams.get('end_month')) {
                     document.getElementById('monthFilterContainer').style.display = 'block';
                 }
             });
 
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const searchInput = document.querySelector('.search-input');
                 const reportsTableBody = document.getElementById('reportsTableBody');
                 const totalReportsCount = document.getElementById('totalReportsCount');
@@ -1051,9 +1052,9 @@ mysqli_close($conn);
 
                 if (searchInput && reportsTableBody && totalReportsCount) {
                     let searchTimeout;
-                    searchInput.addEventListener('input', function() {
+                    searchInput.addEventListener('input', function () {
                         clearTimeout(searchTimeout);
-                        searchTimeout = setTimeout(function() {
+                        searchTimeout = setTimeout(function () {
                             const query = searchInput.value;
                             if (query === '') {
                                 if (paginationContainer) paginationContainer.style.display = '';
@@ -1076,7 +1077,7 @@ mysqli_close($conn);
                         }, 0);
                     });
                     // Prevent Enter key from submitting the form
-                    searchInput.addEventListener('keydown', function(e) {
+                    searchInput.addEventListener('keydown', function (e) {
                         if (e.key === 'Enter') {
                             e.preventDefault();
                         }
@@ -1088,7 +1089,7 @@ mysqli_close($conn);
                 const toggles = document.querySelectorAll('.report-dropdown-toggle');
 
                 toggles.forEach(toggle => {
-                    toggle.addEventListener('click', function(event) {
+                    toggle.addEventListener('click', function (event) {
                         event.preventDefault();
                         const dropdown = this.closest('.report-dropdown');
                         dropdown.classList.toggle('show');
@@ -1112,26 +1113,26 @@ mysqli_close($conn);
                 });
             });
 
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 // Show Confirm Logout Modal
-                document.getElementById('logoutLink').addEventListener('click', function(e) {
+                document.getElementById('logoutLink').addEventListener('click', function (e) {
                     e.preventDefault();
                     document.getElementById('logoutModal').style.display = 'flex';
                     document.getElementById('profileDropdown').classList.remove('show'); // <-- Add this line
                 });
 
                 // Handle Confirm Logout
-                document.getElementById('confirmLogout').addEventListener('click', function() {
+                document.getElementById('confirmLogout').addEventListener('click', function () {
                     window.location.href = 'logout.php';
                 });
 
                 // Handle Cancel Logout
-                document.getElementById('cancelLogout').addEventListener('click', function() {
+                document.getElementById('cancelLogout').addEventListener('click', function () {
                     document.getElementById('logoutModal').style.display = 'none';
                 });
             });
 
-            window.onclick = function(event) {
+            window.onclick = function (event) {
                 // ...existing code...
                 const logoutModal = document.getElementById('logoutModal');
                 if (event.target === logoutModal) {

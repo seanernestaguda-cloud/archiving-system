@@ -462,36 +462,20 @@ mysqli_close($conn);
                                     <a href="?sort_by=report_title" class="select-multi-btn"
                                         style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Title</a>
                                     <a href="?sort_by=created_at" class="select-multi-btn"
-                                        style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Date Created</a>
+                                        style="width:100%; text-align:left; border-radius:0; border-bottom:1px solid #eee; text-decoration: none;">Date
+                                        Created</a>
                                     <a href="?sort_by=fire_location" class="select-multi-btn"
                                         style="width:100%; text-align:left; border-radius:0; text-decoration: none;">Location</a>
                                 </div>
                             </div>
-                            <button id="toggleMonthFilterBtn" class="select-multi-btn" type="button"
-                                onclick="toggleMonthFilter()">
-                                <i style="color:#0096FF;" class="fa-solid fa-calendar"></i>
-                            </button>
-                            <div id="monthFilterContainer" style="display:none;">
-                                <form action="fire_incident_report.php" method="GET"
-                                    style="display: flex; gap: 8px; align-items: center;">
-                                    <label>
-                                        <input type="month" name="start_month"
-                                            value="<?php echo isset($_GET['start_month']) ? htmlspecialchars($_GET['start_month']) : ''; ?>">
-                                    </label>
-                                    <span>to</span>
-                                    <label>
-                                        <input type="month" name="end_month"
-                                            value="<?php echo isset($_GET['end_month']) ? htmlspecialchars($_GET['end_month']) : ''; ?>">
-                                    </label>
-                                    <button type="submit" class="filter-multi-btn">Filter</button>
-                                    <a href="fire_incident_report.php" class="clear-filter-multi-btn">Clear Filter</a>
-                                </form>
 
-                            </div>
                             <form action="export_my_reports.php" method="GET" style="display:inline;">
-                                <input type="hidden" name="start_month" value="<?php echo isset($_GET['start_month']) ? htmlspecialchars($_GET['start_month']) : ''; ?>">
-                                <input type="hidden" name="end_month" value="<?php echo isset($_GET['end_month']) ? htmlspecialchars($_GET['end_month']) : ''; ?>">
-                                <input type="hidden" name="sort_by" value="<?php echo isset($_GET['sort_by']) ? htmlspecialchars($_GET['sort_by']) : ''; ?>">
+                                <input type="hidden" name="start_month"
+                                    value="<?php echo isset($_GET['start_month']) ? htmlspecialchars($_GET['start_month']) : ''; ?>">
+                                <input type="hidden" name="end_month"
+                                    value="<?php echo isset($_GET['end_month']) ? htmlspecialchars($_GET['end_month']) : ''; ?>">
+                                <input type="hidden" name="sort_by"
+                                    value="<?php echo isset($_GET['sort_by']) ? htmlspecialchars($_GET['sort_by']) : ''; ?>">
                                 <button type="submit" class="select-multi-btn">
                                     <i class="fa-solid fa-file-excel" style="color: green;"></i>
                                     <label for="">.csv</label>
@@ -623,25 +607,25 @@ mysqli_close($conn);
                         <div id="paginationContainer" class="pagination" style="margin: 20px 0; text-align: center;">
                             <?php if ($page > 1): ?>
                                 <a href="?<?php
-                                            $params = $_GET;
-                                            $params['page'] = $page - 1;
-                                            echo http_build_query($params);
-                                            ?>" class="pagination-btn">&laquo; Prev</a>
+                                $params = $_GET;
+                                $params['page'] = $page - 1;
+                                echo http_build_query($params);
+                                ?>" class="pagination-btn">&laquo; Prev</a>
                             <?php endif; ?>
                             <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                 <a href="?<?php
-                                            $params = $_GET;
-                                            $params['page'] = $i;
-                                            echo http_build_query($params);
-                                            ?>" class="pagination-btn<?php if ($i == $page)
-                                                                            echo ' active'; ?>"><?php echo $i; ?></a>
+                                $params = $_GET;
+                                $params['page'] = $i;
+                                echo http_build_query($params);
+                                ?>" class="pagination-btn<?php if ($i == $page)
+                                    echo ' active'; ?>"><?php echo $i; ?></a>
                             <?php endfor; ?>
                             <?php if ($page < $total_pages): ?>
                                 <a href="?<?php
-                                            $params = $_GET;
-                                            $params['page'] = $page + 1;
-                                            echo http_build_query($params);
-                                            ?>" class="pagination-btn">Next &raquo;</a>
+                                $params = $_GET;
+                                $params['page'] = $page + 1;
+                                echo http_build_query($params);
+                                ?>" class="pagination-btn">Next &raquo;</a>
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
@@ -700,10 +684,10 @@ mysqli_close($conn);
         </div>
         <script>
             // Print button functionality (table only, no buttons and no action column)
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const printBtn = document.getElementById('printTableBtn');
                 if (printBtn) {
-                    printBtn.addEventListener('click', function() {
+                    printBtn.addEventListener('click', function () {
                         const table = document.querySelector('.archive-table');
                         const totalReports = document.getElementById('totalReportsCount');
                         if (table) {
@@ -735,7 +719,7 @@ mysqli_close($conn);
                             printWindow.document.write('</body></html>');
                             printWindow.document.close();
                             printWindow.focus();
-                            setTimeout(function() {
+                            setTimeout(function () {
                                 printWindow.print();
                             }, 500);
                         }
@@ -746,7 +730,7 @@ mysqli_close($conn);
                 const toggles = document.querySelectorAll('.report-dropdown-toggle');
 
                 toggles.forEach(toggle => {
-                    toggle.addEventListener('click', function(event) {
+                    toggle.addEventListener('click', function (event) {
                         event.preventDefault();
                         const dropdown = this.closest('.report-dropdown');
                         dropdown.classList.toggle('show');
@@ -770,26 +754,26 @@ mysqli_close($conn);
                 });
             });
 
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 // Show Confirm Logout Modal
-                document.getElementById('logoutLink').addEventListener('click', function(e) {
+                document.getElementById('logoutLink').addEventListener('click', function (e) {
                     e.preventDefault();
                     document.getElementById('logoutModal').style.display = 'flex';
                     document.getElementById('profileDropdown').classList.remove('show'); // <-- Add this line
                 });
 
                 // Handle Confirm Logout
-                document.getElementById('confirmLogout').addEventListener('click', function() {
+                document.getElementById('confirmLogout').addEventListener('click', function () {
                     window.location.href = 'logout.php';
                 });
 
                 // Handle Cancel Logout
-                document.getElementById('cancelLogout').addEventListener('click', function() {
+                document.getElementById('cancelLogout').addEventListener('click', function () {
                     document.getElementById('logoutModal').style.display = 'none';
                 });
             });
 
-            window.onclick = function(event) {
+            window.onclick = function (event) {
                 // ...existing code...
                 const logoutModal = document.getElementById('logoutModal');
                 if (event.target === logoutModal) {
@@ -868,17 +852,17 @@ mysqli_close($conn);
                 document.getElementById('confirmDeleteModal').style.display = 'flex';
                 // Attach confirm handler for single delete
                 var confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
-                confirmDeleteBtn.onclick = function() {
+                confirmDeleteBtn.onclick = function () {
                     // Send AJAX request to delete_selected_reports.php
                     fetch('delete_selected_reports.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                report_ids: [singleDeleteId]
-                            })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            report_ids: [singleDeleteId]
                         })
+                    })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
@@ -897,19 +881,19 @@ mysqli_close($conn);
             }
 
             // Confirm delete handler for both single and multi delete
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 var confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
                 if (confirmDeleteBtn) {
-                    confirmDeleteBtn.onclick = function() {
+                    confirmDeleteBtn.onclick = function () {
                         if (singleDeleteId) {
                             // Single delete
                             fetch('delete_report.php', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/x-www-form-urlencoded'
-                                    },
-                                    body: 'report_id=' + encodeURIComponent(singleDeleteId)
-                                })
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                body: 'report_id=' + encodeURIComponent(singleDeleteId)
+                            })
                                 .then(response => response.json())
                                 .then(data => {
                                     if (data.success) {
@@ -924,14 +908,14 @@ mysqli_close($conn);
                         } else if (selectedToDelete.length > 0) {
                             // Multi delete
                             fetch('delete_selected_reports.php', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify({
-                                        report_ids: selectedToDelete
-                                    })
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    report_ids: selectedToDelete
                                 })
+                            })
                                 .then(response => response.json())
                                 .then(data => {
                                     if (data.success) {
@@ -1003,14 +987,66 @@ mysqli_close($conn);
                 });
             }
 
-            document.addEventListener('DOMContentLoaded', function() {
+
+            document.addEventListener('DOMContentLoaded', function () {
                 const urlParams = new URLSearchParams(window.location.search);
                 if (urlParams.get('start_month') || urlParams.get('end_month')) {
                     document.getElementById('monthFilterContainer').style.display = 'block';
                 }
+
+                // Month filter AJAX
+                const monthFilterForm = document.getElementById('monthFilterForm');
+                if (monthFilterForm) {
+                    monthFilterForm.addEventListener('submit', function (e) {
+                        e.preventDefault();
+                        const startMonth = monthFilterForm.elements['start_month'].value;
+                        const endMonth = monthFilterForm.elements['end_month'].value;
+                        const params = new URLSearchParams(window.location.search);
+                        if (startMonth) params.set('start_month', startMonth);
+                        else params.delete('start_month');
+                        if (endMonth) params.set('end_month', endMonth);
+                        else params.delete('end_month');
+                        params.set('count', '1');
+                        fetch('my_fire_incident_report_ajax.php?' + params.toString())
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById('reportsTableBody').innerHTML = data.html;
+                                if (document.getElementById('totalReportsCount') && typeof data.count !== 'undefined') {
+                                    document.getElementById('totalReportsCount').textContent = 'Total Reports: ' + data.count;
+                                }
+                                if (data.pagination && document.getElementById('paginationContainer')) {
+                                    document.getElementById('paginationContainer').innerHTML = data.pagination;
+                                }
+                            });
+                    });
+                }
+                // Clear filter button
+                const clearBtn = document.getElementById('clearMonthFilterBtn');
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', function () {
+                        const params = new URLSearchParams(window.location.search);
+                        params.delete('start_month');
+                        params.delete('end_month');
+                        params.set('count', '1');
+                        fetch('my_fire_incident_report_ajax.php?' + params.toString())
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById('reportsTableBody').innerHTML = data.html;
+                                if (document.getElementById('totalReportsCount') && typeof data.count !== 'undefined') {
+                                    document.getElementById('totalReportsCount').textContent = 'Total Reports: ' + data.count;
+                                }
+                                if (data.pagination && document.getElementById('paginationContainer')) {
+                                    document.getElementById('paginationContainer').innerHTML = data.pagination;
+                                }
+                                // Clear input fields
+                                monthFilterForm.elements['start_month'].value = '';
+                                monthFilterForm.elements['end_month'].value = '';
+                            });
+                    });
+                }
             });
 
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const searchInput = document.querySelector('.search-input');
                 const reportsTableBody = document.getElementById('reportsTableBody');
                 const totalReportsCount = document.getElementById('totalReportsCount');
@@ -1018,9 +1054,9 @@ mysqli_close($conn);
 
                 if (searchInput && reportsTableBody && totalReportsCount) {
                     let searchTimeout;
-                    searchInput.addEventListener('input', function() {
+                    searchInput.addEventListener('input', function () {
                         clearTimeout(searchTimeout);
-                        searchTimeout = setTimeout(function() {
+                        searchTimeout = setTimeout(function () {
                             const query = searchInput.value;
                             if (query === '') {
                                 window.location.href = window.location.pathname + window.location.search.replace(/([?&])search=[^&]*/g, '');
@@ -1041,7 +1077,7 @@ mysqli_close($conn);
                         }, 0);
                     });
                     // Prevent Enter key from submitting the form
-                    searchInput.addEventListener('keydown', function(e) {
+                    searchInput.addEventListener('keydown', function (e) {
                         if (e.key === 'Enter') {
                             e.preventDefault();
                         }
